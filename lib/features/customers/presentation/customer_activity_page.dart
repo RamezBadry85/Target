@@ -36,7 +36,13 @@ class _CustomerActivityPageState extends State<CustomerActivityPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if(errorMessage!=null) Text(errorMessage!,style:TextStyle(color:Theme.of(context).colorScheme.error)),
+                  if (errorMessage != null)
+                    Text(
+                      errorMessage!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
                   DropdownButtonFormField<ActivityType>(
                     initialValue: type,
                     isExpanded: true,
@@ -93,14 +99,31 @@ class _CustomerActivityPageState extends State<CustomerActivityPage> {
               child: Text(s.cancel),
             ),
             FilledButton(
-              onPressed: saving ? null : () async {
-                setDialog(() { saving=true;errorMessage=null; });
-                try {
-                  await widget.repository.addActivity(customer.id,customer.revision,type,text.text,date);
-                  if(context.mounted) Navigator.pop(context,true);
-                } catch(error) { if(context.mounted) setDialog(()=>errorMessage=customerError(error,s)); }
-                finally { if(context.mounted) setDialog(()=>saving=false); }
-              },
+              onPressed: saving
+                  ? null
+                  : () async {
+                      setDialog(() {
+                        saving = true;
+                        errorMessage = null;
+                      });
+                      try {
+                        await widget.repository.addActivity(
+                          customer.id,
+                          customer.revision,
+                          type,
+                          text.text,
+                          date,
+                        );
+                        if (context.mounted) Navigator.pop(context, true);
+                      } catch (error) {
+                        if (context.mounted)
+                          setDialog(
+                            () => errorMessage = customerError(error, s),
+                          );
+                      } finally {
+                        if (context.mounted) setDialog(() => saving = false);
+                      }
+                    },
               child: Text(s.save),
             ),
           ],
