@@ -14,8 +14,16 @@ class ObservedCustomerRepository extends LocalCustomerRepository {
   ObservedCustomerRepository(super.db);
   Future<Customer>? lastSave;
   @override
-  Future<Customer> save(CustomerDraft draft,{String? id,int? expectedRevision}) {
-    return lastSave=super.save(draft,id:id,expectedRevision:expectedRevision);
+  Future<Customer> save(
+    CustomerDraft draft, {
+    String? id,
+    int? expectedRevision,
+  }) {
+    return lastSave = super.save(
+      draft,
+      id: id,
+      expectedRevision: expectedRevision,
+    );
   }
 }
 
@@ -92,7 +100,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.runAsync(() async {
       await tester.tap(save);
-      expect(repo.lastSave,isNotNull);
+      expect(repo.lastSave, isNotNull);
       await repo.lastSave;
     });
     await tester.pumpAndSettle();
