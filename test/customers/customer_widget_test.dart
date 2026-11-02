@@ -76,6 +76,8 @@ void main() {
     final phone = find.byKey(const ValueKey('contact-0-phone'));
     await tester.ensureVisible(phone);
     await tester.enterText(phone, '01055556666');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
     final save = find.byKey(const ValueKey('save-customer'));
     await tester.ensureVisible(save);
     await tester.pumpAndSettle();
