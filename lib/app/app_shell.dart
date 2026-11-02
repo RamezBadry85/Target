@@ -20,12 +20,18 @@ class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
   final _customers = CustomerDependencies();
   @override
-  void dispose() { unawaited(_customers.close()); super.dispose(); }
+  void dispose() {
+    unawaited(_customers.close());
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
-    final destinations = AppDestination.all(widget.onLocaleChanged, openCustomers: _customers.open);
+    final destinations = AppDestination.all(
+      widget.onLocaleChanged,
+      openCustomers: _customers.open,
+    );
     final selected = destinations[_selectedIndex];
 
     Widget navigation({required bool drawer}) => SafeArea(

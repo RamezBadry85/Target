@@ -10,10 +10,32 @@ class CustomerDependencies {
   Future<CustomerModule> open() => _module ??= _open();
   Future<CustomerModule> _open() async {
     try {
-      final fonts=await Future.wait([rootBundle.load('assets/fonts/Amiri-Regular.ttf'),rootBundle.load('assets/fonts/Amiri-Bold.ttf')]);
-      final db=await openLocalCustomerDatabase();
-      return CustomerModule(LocalCustomerRepository(db),CustomerReportExporter(regularFont:fonts[0].buffer.asUint8List(),boldFont:fonts[1].buffer.asUint8List()));
-    } catch(_) { _module=null; rethrow; }
+      final fonts = await Future.wait([
+        rootBundle.load('assets/fonts/Amiri-Regular.ttf'),
+        rootBundle.load('assets/fonts/Amiri-Bold.ttf'),
+      ]);
+      final db = await openLocalCustomerDatabase();
+      return CustomerModule(
+        LocalCustomerRepository(db),
+        CustomerReportExporter(
+          regularFont: fonts[0].buffer.asUint8List(),
+          boldFont: fonts[1].buffer.asUint8List(),
+        ),
+      );
+    } catch (_) {
+      _module = null;
+      rethrow;
+    }
   }
-  Future<void> close() async { final module=_module; if(module!=null) { try { await (await module).repository.close(); } catch(_) { /* Failed initialization has no open database to close. */ } } }
+
+  Future<void> close() async {
+    final module = _module;
+    if (module != null) {
+      try {
+        await (await module).repository.close();
+      } catch (_) {
+        /* Failed initialization has no open database to close. */
+      }
+    }
+  }
 }

@@ -5,6 +5,9 @@ import 'customer_database.dart';
 
 Future<Database> openLocalCustomerDatabase() async {
   final directory = await getApplicationSupportDirectory();
-  await directory.create(recursive:true);
-  return openCustomerDatabase(databaseFactoryIo,path.join(directory.path,'target-customers.db'));
+  await directory.create(recursive: true);
+  return openCustomerDatabase(
+    databaseFactoryIo,
+    path.join(directory.path, 'target-customers.db'),
+  );
 }

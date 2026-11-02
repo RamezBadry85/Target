@@ -29,7 +29,10 @@ class AppDestination {
 
   String label(AppStrings strings) => strings.choose(arabic, english);
 
-  static List<AppDestination> all(ValueChanged<Locale> onLocaleChanged, {Future<CustomerModule> Function()? openCustomers}) => [
+  static List<AppDestination> all(
+    ValueChanged<Locale> onLocaleChanged, {
+    Future<CustomerModule> Function()? openCustomers,
+  }) => [
     AppDestination(
       id: 'dashboard',
       arabic: 'لوحة التحكم',
@@ -42,7 +45,13 @@ class AppDestination {
       arabic: 'العملاء',
       english: 'Customers',
       icon: Icons.people_outline,
-      page: CustomersPage(openModule: openCustomers ?? () => Future<CustomerModule>.error(StateError('Customer composition is required'))),
+      page: CustomersPage(
+        openModule:
+            openCustomers ??
+            () => Future<CustomerModule>.error(
+              StateError('Customer composition is required'),
+            ),
+      ),
     ),
     AppDestination(
       id: 'sales',
