@@ -10,6 +10,15 @@ import 'package:target/features/customers/domain/customer_repository.dart';
 import 'package:target/features/customers/presentation/customers_page.dart';
 import 'customer_repository_test.dart' show draft;
 
+class ObservedCustomerRepository extends LocalCustomerRepository {
+  ObservedCustomerRepository(super.db);
+  Future<Customer>? lastSave;
+  @override
+  Future<Customer> save(CustomerDraft draft,{String? id,int? expectedRevision}) {
+    return lastSave=super.save(draft,id:id,expectedRevision:expectedRevision);
+  }
+}
+
 class NoReports implements CustomerReports {
   @override
   Future<Uint8List> xlsx(List<Customer> customers, {required bool arabic}) =>
@@ -34,10 +43,10 @@ Widget app(CustomerModule module, {String locale = 'ar'}) => MaterialApp(
   ),
 );
 void main() {
-  late LocalCustomerRepository repo;
+  late ObservedCustomerRepository repo;
   late CustomerModule module;
   setUp(() async {
-    repo = LocalCustomerRepository(
+    repo = ObservedCustomerRepository(
       await openCustomerDatabase(newDatabaseFactoryMemory(), 'widget.db'),
     );
     module = CustomerModule(repo, NoReports());
@@ -83,7 +92,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.runAsync(() async {
       await tester.tap(save);
-      await repo.all();
+      expect(repo.lastSave,isNotNull);
+      await repo.lastSave;
     });
     await tester.pumpAndSettle();
     expect(
