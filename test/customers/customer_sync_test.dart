@@ -127,12 +127,30 @@ void main() {
       );
     },
   );
-  test('backup recovery preserves and blocks unresolved conflicts',() async {
+  test('backup recovery preserves and blocks unresolved conflicts', () async {
     await repo.save(draft());
-    final engine=CustomerSyncService(repo,Gateway((change,version) async=>const SyncConflict({'name':'remote'},'v2')));
+    final engine = CustomerSyncService(
+      repo,
+      Gateway(
+        (change, version) async => const SyncConflict({'name': 'remote'}, 'v2'),
+      ),
+    );
     await engine.flush();
-    final other=LocalCustomerRepository(await openCustomerDatabase(newDatabaseFactoryMemory(),'conflict-restore.db'));
-    try{await other.restore(await repo.backup());expect((await other.all()).single.syncStatus,CustomerSyncStatus.conflict);expect((await other.pendingChanges()).single.blocked,isTrue);}finally{await other.close();}
+    final other = LocalCustomerRepository(
+      await openCustomerDatabase(
+        newDatabaseFactoryMemory(),
+        'conflict-restore.db',
+      ),
+    );
+    try {
+      await other.restore(await repo.backup());
+      expect(
+        (await other.all()).single.syncStatus,
+        CustomerSyncStatus.conflict,
+      );
+      expect((await other.pendingChanges()).single.blocked, isTrue);
+    } finally {
+      await other.close();
+    }
   });
-
 }

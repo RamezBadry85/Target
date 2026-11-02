@@ -323,7 +323,7 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
       }
       final customerIds = <String>{};
       final contactIds = <String>{};
-      final restoredCustomers=<String,Customer>{};
+      final restoredCustomers = <String, Customer>{};
       for (final row in records[customerStore.name]!) {
         final c = CustomerCodec.read(
           Map<String, Object?>.from(row['value'] as Map<Object?, Object?>),
@@ -335,8 +335,11 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
             c.updatedAt.isBefore(c.createdAt)) {
           throw const FormatException();
         }
-        if(restoredCustomers.values.any((other)=>CustomerValidation.duplicate(c.data,other.data))) throw const FormatException();
-        restoredCustomers[c.id]=c;
+        if (restoredCustomers.values.any(
+          (other) => CustomerValidation.duplicate(c.data, other.data),
+        ))
+          throw const FormatException();
+        restoredCustomers[c.id] = c;
         for (final contact in c.data.contacts) {
           if (!contactIds.add(contact.id)) throw const FormatException();
         }
@@ -353,28 +356,57 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
           throw const FormatException();
         }
       }
-      final operationIds=<String>{};
-      for(final row in records[outboxStore.name]!) {
-        final m=Map<String,Object?>.from(row['value'] as Map<Object?,Object?>);
-        final id=m['id'] as String;
-        final customerId=m['customerId'] as String;
-        final revision=m['revision'] as int;
-        final payload=Map<String,Object?>.from(m['payload'] as Map<Object?,Object?>);
-        final snapshot=CustomerCodec.read(Map<String,Object?>.from(payload['customer'] as Map<Object?,Object?>));
-        if(id!=row['key'] || !operationIds.add(id) || !customerIds.contains(customerId) || revision<1 || revision>restoredCustomers[customerId]!.revision || snapshot.id!=customerId || snapshot.revision!=revision || (m['attempts'] as int)<0 || m['blocked'] is! bool) throw const FormatException();
+      final operationIds = <String>{};
+      for (final row in records[outboxStore.name]!) {
+        final m = Map<String, Object?>.from(
+          row['value'] as Map<Object?, Object?>,
+        );
+        final id = m['id'] as String;
+        final customerId = m['customerId'] as String;
+        final revision = m['revision'] as int;
+        final payload = Map<String, Object?>.from(
+          m['payload'] as Map<Object?, Object?>,
+        );
+        final snapshot = CustomerCodec.read(
+          Map<String, Object?>.from(
+            payload['customer'] as Map<Object?, Object?>,
+          ),
+        );
+        if (id != row['key'] ||
+            !operationIds.add(id) ||
+            !customerIds.contains(customerId) ||
+            revision < 1 ||
+            revision > restoredCustomers[customerId]!.revision ||
+            snapshot.id != customerId ||
+            snapshot.revision != revision ||
+            (m['attempts'] as int) < 0 ||
+            m['blocked'] is! bool)
+          throw const FormatException();
         CustomerValidation.validate(snapshot.data);
         DateTime.parse(m['createdAt'] as String);
-        if(m['nextAttemptAt']!=null) DateTime.parse(m['nextAttemptAt'] as String);
-        for(final raw in payload['activities'] as List<Object?>) {
-          final activity=CustomerCodec.readActivity(Map<String,Object?>.from(raw as Map<Object?,Object?>));
-          if(activity.customerId!=customerId || !activityIds.contains(activity.id)) throw const FormatException();
+        if (m['nextAttemptAt'] != null)
+          DateTime.parse(m['nextAttemptAt'] as String);
+        for (final raw in payload['activities'] as List<Object?>) {
+          final activity = CustomerCodec.readActivity(
+            Map<String, Object?>.from(raw as Map<Object?, Object?>),
+          );
+          if (activity.customerId != customerId ||
+              !activityIds.contains(activity.id))
+            throw const FormatException();
         }
       }
-      final conflicted=<String>{};
-      for(final row in records[conflictStore.name]!) {
-        final id=row['key'] as String;
-        final m=Map<String,Object?>.from(row['value'] as Map<Object?,Object?>);
-        if(!customerIds.contains(id) || !conflicted.add(id) || !operationIds.contains(m['changeId']) || m['remoteSnapshot'] is! Map<Object?,Object?> || (m['remoteVersion'] as String).isEmpty) throw const FormatException();
+      final conflicted = <String>{};
+      for (final row in records[conflictStore.name]!) {
+        final id = row['key'] as String;
+        final m = Map<String, Object?>.from(
+          row['value'] as Map<Object?, Object?>,
+        );
+        if (!customerIds.contains(id) ||
+            !conflicted.add(id) ||
+            !operationIds.contains(m['changeId']) ||
+            m['remoteSnapshot'] is! Map<Object?, Object?> ||
+            (m['remoteVersion'] as String).isEmpty)
+          throw const FormatException();
         DateTime.parse(m['detectedAt'] as String);
       }
       // Requeue current complete aggregates instead of trusting imported sync
@@ -409,12 +441,19 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
               archivedAt: old.archivedAt,
               revision: old.revision + 1,
               remoteVersion: old.remoteVersion,
-              syncStatus: conflicted.contains(old.id) ? CustomerSyncStatus.conflict : CustomerSyncStatus.pending,
+              syncStatus: conflicted.contains(old.id)
+                  ? CustomerSyncStatus.conflict
+                  : CustomerSyncStatus.pending,
             ),
           );
-          if(conflicted.contains(old.id)) {
-            for(final entry in await outboxStore.find(txn,finder:Finder(filter:Filter.equals('customerId',old.id)))) {
-              await outboxStore.record(entry.key).update(txn,{'blocked':true});
+          if (conflicted.contains(old.id)) {
+            for (final entry in await outboxStore.find(
+              txn,
+              finder: Finder(filter: Filter.equals('customerId', old.id)),
+            )) {
+              await outboxStore.record(entry.key).update(txn, {
+                'blocked': true,
+              });
             }
           }
         }

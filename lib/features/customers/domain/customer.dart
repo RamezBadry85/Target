@@ -144,7 +144,9 @@ class CustomerQuery {
                   d.governorate,
                   d.city,
                   d.area,
-                  ...d.contacts.expand((p) => [p.name, p.phone, p.alternativePhone, p.email]),
+                  ...d.contacts.expand(
+                    (p) => [p.name, p.phone, p.alternativePhone, p.email],
+                  ),
                 ].join(' '),
               ).contains(needle));
     }).toList();
