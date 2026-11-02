@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:target/app/target_app.dart';
+import 'package:sembast/sembast_memory.dart';
+import 'package:target/features/customers/data/customer_database.dart';
+import 'package:target/features/customers/data/local_customer_repository.dart';
+import 'package:target/features/customers/domain/customer_repository.dart';
+import 'customers/customer_widget_test.dart' show NoReports;
 
 void main() {
+  late LocalCustomerRepository customers;
+  late CustomerModule module;
+  setUp(() async {
+    customers=LocalCustomerRepository(await openCustomerDatabase(newDatabaseFactoryMemory(),'app-test.db'));
+    module=CustomerModule(customers,NoReports());
+  });
+  tearDown(() async {await customers.close();});
   testWidgets('startup defaults to Arabic RTL and an honest empty state', (
     tester,
   ) async {
-    await tester.pumpWidget(const TargetApp());
+    await tester.pumpWidget(TargetApp(openCustomers: () async => module));
     await tester.pumpAndSettle();
     final context = tester.element(find.text('لوحة التحكم'));
     expect(Localizations.localeOf(context).languageCode, 'ar');
@@ -21,7 +33,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(const TargetApp());
+      await tester.pumpWidget(TargetApp(openCustomers: () async => module));
       await tester.pumpAndSettle();
       final desktop = width >= 1100;
       expect(
@@ -47,7 +59,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(const TargetApp());
+    await tester.pumpWidget(TargetApp(openCustomers: () async => module));
     await tester.pumpAndSettle();
     for (final id in [
       'dashboard',
@@ -90,7 +102,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-    await tester.pumpWidget(const TargetApp());
+    await tester.pumpWidget(TargetApp(openCustomers: () async => module));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });

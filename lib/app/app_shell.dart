@@ -6,10 +6,12 @@ import '../core/presentation/responsive_layout.dart';
 import '../core/theme/app_theme.dart';
 import 'app_destination.dart';
 import 'customer_dependencies.dart';
+import '../features/customers/domain/customer_repository.dart';
 
 /// Session-only UI state. Business state belongs in feature controllers/use cases.
 class AppShell extends StatefulWidget {
-  const AppShell({super.key, required this.onLocaleChanged});
+  const AppShell({super.key, required this.onLocaleChanged, this.openCustomers});
+  final Future<CustomerModule> Function()? openCustomers;
   final ValueChanged<Locale> onLocaleChanged;
 
   @override
@@ -30,7 +32,7 @@ class _AppShellState extends State<AppShell> {
     final strings = AppStrings.of(context);
     final destinations = AppDestination.all(
       widget.onLocaleChanged,
-      openCustomers: _customers.open,
+      openCustomers: widget.openCustomers ?? _customers.open,
     );
     final selected = destinations[_selectedIndex];
 

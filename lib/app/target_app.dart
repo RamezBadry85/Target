@@ -4,9 +4,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import '../core/l10n/app_strings.dart';
 import '../core/theme/app_theme.dart';
 import 'app_shell.dart';
+import '../features/customers/domain/customer_repository.dart';
 
 class TargetApp extends StatefulWidget {
-  const TargetApp({super.key});
+  const TargetApp({super.key, this.openCustomers});
+  final Future<CustomerModule> Function()? openCustomers;
 
   @override
   State<TargetApp> createState() => _TargetAppState();
@@ -29,6 +31,7 @@ class _TargetAppState extends State<TargetApp> {
       GlobalCupertinoLocalizations.delegate,
     ],
     home: AppShell(
+      openCustomers: widget.openCustomers,
       onLocaleChanged: (locale) => setState(() => _locale = locale),
     ),
   );
