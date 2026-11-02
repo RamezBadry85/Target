@@ -5,7 +5,6 @@ class SalesTargetsPage extends StatelessWidget {
   const SalesTargetsPage({super.key});
 
   @override
-  Widget build(BuildContext context) => FeaturePlaceholder(
-    icon: Icons.flag_outlined,
-  );
+  Widget build(BuildContext context) =>
+      FeaturePlaceholder(icon: Icons.flag_outlined);
 }

@@ -15,7 +15,10 @@ class SettingsPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(strings.language, style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              strings.language,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 16),
             SegmentedButton<String>(
               segments: const [
@@ -23,7 +26,8 @@ class SettingsPage extends StatelessWidget {
                 ButtonSegment(value: 'en', label: Text('English')),
               ],
               selected: {Localizations.localeOf(context).languageCode},
-              onSelectionChanged: (value) => onLocaleChanged(Locale(value.single)),
+              onSelectionChanged: (value) =>
+                  onLocaleChanged(Locale(value.single)),
             ),
             const SizedBox(height: 16),
             Text(strings.foundation),

@@ -9,7 +9,11 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    AppLogger.error('Flutter framework failure', details.exception, details.stack);
+    AppLogger.error(
+      'Flutter framework failure',
+      details.exception,
+      details.stack,
+    );
   };
   PlatformDispatcher.instance.onError = (error, stack) {
     AppLogger.error('Unhandled asynchronous failure', error, stack);

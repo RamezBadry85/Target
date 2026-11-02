@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:target/app/target_app.dart';
 
 void main() {
-  testWidgets('startup defaults to Arabic RTL and an honest empty state', (tester) async {
+  testWidgets('startup defaults to Arabic RTL and an honest empty state', (
+    tester,
+  ) async {
     await tester.pumpWidget(const TargetApp());
     await tester.pumpAndSettle();
     final context = tester.element(find.text('لوحة التحكم'));
@@ -22,7 +24,10 @@ void main() {
       await tester.pumpWidget(const TargetApp());
       await tester.pumpAndSettle();
       final desktop = width >= 1100;
-      expect(find.byType(DrawerButton), desktop ? findsNothing : findsOneWidget);
+      expect(
+        find.byType(DrawerButton),
+        desktop ? findsNothing : findsOneWidget,
+      );
       if (!desktop) {
         final scaffold = tester.state<ScaffoldState>(find.byType(Scaffold));
         scaffold.openDrawer();
@@ -35,7 +40,9 @@ void main() {
     });
   }
 
-  testWidgets('all modules are reachable; English switches direction', (tester) async {
+  testWidgets('all modules are reachable; English switches direction', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1440, 1100);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -43,8 +50,16 @@ void main() {
     await tester.pumpWidget(const TargetApp());
     await tester.pumpAndSettle();
     for (final id in [
-      'dashboard', 'customers', 'sales', 'quotations', 'opportunities',
-      'follow_ups', 'sales_targets', 'collections', 'reports', 'settings',
+      'dashboard',
+      'customers',
+      'sales',
+      'quotations',
+      'opportunities',
+      'follow_ups',
+      'sales_targets',
+      'collections',
+      'reports',
+      'settings',
     ]) {
       final item = find.byKey(ValueKey('nav-$id'));
       await tester.ensureVisible(item);
@@ -60,10 +75,15 @@ void main() {
     expect(find.text('Settings'), findsNWidgets(2));
     await tester.tap(find.text('العربية'));
     await tester.pumpAndSettle();
-    expect(Directionality.of(tester.element(find.text('اللغة'))), TextDirection.rtl);
+    expect(
+      Directionality.of(tester.element(find.text('اللغة'))),
+      TextDirection.rtl,
+    );
   });
 
-  testWidgets('compact landscape supports large text without overflow', (tester) async {
+  testWidgets('compact landscape supports large text without overflow', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(568, 320);
     tester.view.devicePixelRatio = 1;
     tester.platformDispatcher.textScaleFactorTestValue = 2;

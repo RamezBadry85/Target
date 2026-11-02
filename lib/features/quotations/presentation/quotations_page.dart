@@ -5,7 +5,6 @@ class QuotationsPage extends StatelessWidget {
   const QuotationsPage({super.key});
 
   @override
-  Widget build(BuildContext context) => FeaturePlaceholder(
-    icon: Icons.request_quote_outlined,
-  );
+  Widget build(BuildContext context) =>
+      FeaturePlaceholder(icon: Icons.request_quote_outlined);
 }

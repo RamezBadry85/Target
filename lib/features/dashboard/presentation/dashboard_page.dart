@@ -8,6 +8,6 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FeaturePlaceholder(
     icon: Icons.dashboard_outlined,
-      description: AppStrings.of(context).dashboardBody,
+    description: AppStrings.of(context).dashboardBody,
   );
 }

@@ -24,13 +24,17 @@ class FeaturePlaceholder extends StatelessWidget {
               children: [
                 Icon(icon, size: 48, color: AppTheme.navy),
                 const SizedBox(height: AppSpacing.large),
-                Text(strings.emptyTitle,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall),
+                Text(
+                  strings.emptyTitle,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
                 const SizedBox(height: AppSpacing.medium),
-                Text(description ?? strings.emptyBody,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  description ?? strings.emptyBody,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ],
             ),
           ),

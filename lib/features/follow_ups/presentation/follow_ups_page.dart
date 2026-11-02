@@ -5,7 +5,6 @@ class FollowUpsPage extends StatelessWidget {
   const FollowUpsPage({super.key});
 
   @override
-  Widget build(BuildContext context) => FeaturePlaceholder(
-    icon: Icons.event_note_outlined,
-  );
+  Widget build(BuildContext context) =>
+      FeaturePlaceholder(icon: Icons.event_note_outlined);
 }

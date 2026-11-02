@@ -5,7 +5,6 @@ class CustomersPage extends StatelessWidget {
   const CustomersPage({super.key});
 
   @override
-  Widget build(BuildContext context) => FeaturePlaceholder(
-    icon: Icons.people_outline,
-  );
+  Widget build(BuildContext context) =>
+      FeaturePlaceholder(icon: Icons.people_outline);
 }

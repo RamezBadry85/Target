@@ -5,7 +5,6 @@ class SalesPage extends StatelessWidget {
   const SalesPage({super.key});
 
   @override
-  Widget build(BuildContext context) => FeaturePlaceholder(
-    icon: Icons.receipt_long_outlined,
-  );
+  Widget build(BuildContext context) =>
+      FeaturePlaceholder(icon: Icons.receipt_long_outlined);
 }

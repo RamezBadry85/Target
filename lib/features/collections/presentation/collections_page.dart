@@ -5,7 +5,6 @@ class CollectionsPage extends StatelessWidget {
   const CollectionsPage({super.key});
 
   @override
-  Widget build(BuildContext context) => FeaturePlaceholder(
-    icon: Icons.account_balance_wallet_outlined,
-  );
+  Widget build(BuildContext context) =>
+      FeaturePlaceholder(icon: Icons.account_balance_wallet_outlined);
 }

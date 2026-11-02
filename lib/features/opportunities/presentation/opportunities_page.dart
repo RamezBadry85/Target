@@ -5,7 +5,6 @@ class OpportunitiesPage extends StatelessWidget {
   const OpportunitiesPage({super.key});
 
   @override
-  Widget build(BuildContext context) => FeaturePlaceholder(
-    icon: Icons.trending_up,
-  );
+  Widget build(BuildContext context) =>
+      FeaturePlaceholder(icon: Icons.trending_up);
 }

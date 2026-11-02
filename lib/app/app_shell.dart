@@ -32,8 +32,10 @@ class _AppShellState extends State<AppShell> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(strings.appName,
-                    style: Theme.of(context).textTheme.headlineMedium),
+                Text(
+                  strings.appName,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
                 Text(strings.workspace),
               ],
             ),
@@ -110,10 +112,15 @@ class _AppShellState extends State<AppShell> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(strings.foundation,
-                            style: Theme.of(context).textTheme.labelLarge),
+                        Text(
+                          strings.foundation,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
                         const SizedBox(height: AppSpacing.large),
-                        KeyedSubtree(key: ValueKey(selected.id), child: selected.page),
+                        KeyedSubtree(
+                          key: ValueKey(selected.id),
+                          child: selected.page,
+                        ),
                       ],
                     ),
                   ),
