@@ -51,7 +51,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await repo.save(draft());
+      await tester.runAsync(() => repo.save(draft()));
       await tester.pumpWidget(app(module));
       await tester.pumpAndSettle();
       expect(find.text('مؤسسة الاختبار'), findsOneWidget);
@@ -78,16 +78,19 @@ void main() {
     await tester.enterText(phone, '01055556666');
     final save = find.byKey(const ValueKey('save-customer'));
     await tester.ensureVisible(save);
-    await tester.tap(save);
+    await tester.runAsync(() async {
+      await tester.tap(save);
+      await repo.watchAll().firstWhere((rows) => rows.length == 1);
+    });
     await tester.pumpAndSettle();
-    expect((await repo.all()).single.data.name, 'عميل من النموذج');
-    expect(await repo.pendingChanges(), hasLength(1));
+    expect((await tester.runAsync(repo.all))!.single.data.name, 'عميل من النموذج');
+    expect(await tester.runAsync(repo.pendingChanges), hasLength(1));
     expect(tester.takeException(), isNull);
   });
   testWidgets(
     'English customer workspace is LTR and searching updates matches',
     (tester) async {
-      await repo.save(draft(name: 'Customer Alpha'));
+      await tester.runAsync(() => repo.save(draft(name: 'Customer Alpha')));
       await tester.pumpWidget(app(module, locale: 'en'));
       await tester.pumpAndSettle();
       expect(
