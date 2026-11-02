@@ -10,7 +10,11 @@ import '../features/customers/domain/customer_repository.dart';
 
 /// Session-only UI state. Business state belongs in feature controllers/use cases.
 class AppShell extends StatefulWidget {
-  const AppShell({super.key, required this.onLocaleChanged, this.openCustomers});
+  const AppShell({
+    super.key,
+    required this.onLocaleChanged,
+    this.openCustomers,
+  });
   final Future<CustomerModule> Function()? openCustomers;
   final ValueChanged<Locale> onLocaleChanged;
 

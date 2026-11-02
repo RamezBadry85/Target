@@ -11,10 +11,14 @@ void main() {
   late LocalCustomerRepository customers;
   late CustomerModule module;
   setUp(() async {
-    customers=LocalCustomerRepository(await openCustomerDatabase(newDatabaseFactoryMemory(),'app-test.db'));
-    module=CustomerModule(customers,NoReports());
+    customers = LocalCustomerRepository(
+      await openCustomerDatabase(newDatabaseFactoryMemory(), 'app-test.db'),
+    );
+    module = CustomerModule(customers, NoReports());
   });
-  tearDown(() async {await customers.close();});
+  tearDown(() async {
+    await customers.close();
+  });
   testWidgets('startup defaults to Arabic RTL and an honest empty state', (
     tester,
   ) async {
