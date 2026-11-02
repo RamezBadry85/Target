@@ -1,11 +1,13 @@
 # Target
 
 
-## Sales Management System — Phase 1
+## Sales Management System — Customer phase
 
 An Arabic-first, responsive Flutter foundation for a single Sales Manager.
-Business operations, inventory, authentication, storage and cloud services are
-**not implemented**. The screens intentionally contain no operational sample data.
+Customer management now includes offline local storage, profiles, activities,
+archive/restore, backup recovery and XLSX/PDF generation. Other business modules,
+inventory, authentication and cloud synchronization are **not implemented**.
+No operational sample data is bundled. See [Customer architecture](docs/CUSTOMERS.md).
 
 ### Getting started
 
@@ -41,9 +43,9 @@ lib/
   features/
     dashboard/ customers/ sales/ quotations/ opportunities/
     follow_ups/ sales_targets/ collections/ reports/ settings/
-      domain/                  # Reserved dependency boundary (documented)
-      data/                    # Reserved dependency boundary (documented)
-      presentation/            # Feature page; no business operations yet
+      domain/                  # Customer models/contracts; other modules reserved
+      data/                    # Customer database/exports; other modules reserved
+      presentation/            # Customer workspace; other modules placeholders
 android/ ios/ windows/ web/ macos/  # Unverified native/web host scaffolds
 test/                         # Unit and widget tests
 tool/                         # Structural checks, reproducible icon generation
@@ -61,8 +63,9 @@ has been retained.
 - `flutter_test`: SDK test tooling (development only).
 - `flutter_lints`: Dart/Flutter lint baseline (development only).
 
-No database, HTTP, service locator, router or state-management package is needed
-for this shell. No paid backend has been selected. `pubspec.lock` is generated with
+The customer phase adds Sembast/IndexedDB, path utilities, UUIDs, report generation
+and file-save/picker adapters; see `pubspec.yaml` and `docs/CUSTOMERS.md` for purposes.
+No paid backend has been selected. `pubspec.lock` is generated with
 Flutter 3.38.5 and committed. CI enforces the locked dependency versions and hashes
 using `flutter pub get --enforce-lockfile`. See [CI verification](docs/CI.md).
 
@@ -77,6 +80,6 @@ used for production distribution. Apple signing teams and Windows distribution
 signing are deliberately not configured; do not commit signing credentials.
 
 The GitHub Actions workflow checks SDK versions, structural validity, locked
-dependencies, Dart formatting, analysis, tests, Web release and Android debug
+dependencies, Dart formatting, analysis, VM and Chrome persistence tests, Web release and Android debug
 builds on pushes/PRs and supports manual dispatch. Windows and Apple
 builds still need their native hosts. No repository settings or secrets are changed.

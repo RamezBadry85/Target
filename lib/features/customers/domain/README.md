@@ -1,3 +1,2 @@
-Pure Dart entities, value objects, repository contracts and use cases belong here.
-Do not import Flutter or infrastructure libraries. Add contracts with real requirements,
-not speculative CRUD APIs.
+Pure Dart customer entities, validation/query policies and repository/report/sync
+contracts. No Flutter or database imports. Money uses integer hundredths.

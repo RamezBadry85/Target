@@ -8,9 +8,11 @@ import sys,re
 previous=[]
 for line in sys.stdin:
  print(line,end="",flush=True)
+ if "All tests passed" in line:
+  print("::notice title=Test summary::"+line.strip(),flush=True)
  previous.append(line.rstrip())
  previous=previous[-8:]
- if re.search(r"^\d{2}:\d{2}.*customer_export_test|\[E\]|TimeoutException|EXCEPTION CAUGHT|Expected:|Actual:",line):
+ if re.search(r"\[E\]|TimeoutException|EXCEPTION CAUGHT|Expected:|Actual:",line):
   text="\n".join(previous).replace("%","%25").replace("\r","%0D").replace("\n","%0A")
   print("::notice title=Live test diagnostics::"+text,flush=True)
 ' 
@@ -23,7 +25,7 @@ text = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', text)
 lines = text.splitlines()
 indices = set(range(max(0,len(lines)-35),len(lines)))
 for i,line in enumerate(lines):
-    if re.search(r'error|exception|failed|Expected:|Actual:|Error:',line,re.I):
+    if re.search(r'error|exception|failed|Expected:|Actual:|Error:|warning|offset|hit test',line,re.I):
         indices.update(range(max(0,i-2),min(len(lines),i+8)))
 selected='\n'.join(lines[i] for i in sorted(indices))[-14000:]
 for start in range(0,len(selected),3500):

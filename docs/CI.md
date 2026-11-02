@@ -27,7 +27,9 @@ still receive updates; this is not a bit-for-bit hermetic build environment.
 3. Run `flutter pub get --enforce-lockfile`; reject a modified lockfile.
 4. Run `dart format --output=none --set-exit-if-changed lib test`.
 5. Run `flutter analyze --no-pub`.
-6. Run `flutter test --no-pub --reporter expanded` (4 unit + 6 widget cases).
+6. Run `flutter test --no-pub --reporter expanded --timeout 2m`, including the
+   customer repository, validation, synchronization, export and UI regressions.
+   Run a separate Chrome test for IndexedDB close/reopen persistence.
 7. Run `flutter build web --release --no-pub`.
 8. Set up Android tools and explicitly install the required SDK/NDK packages.
 9. Run `flutter build apk --debug --no-pub`.
