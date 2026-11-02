@@ -4,41 +4,12 @@ on:
   push:
   pull_request:
   workflow_dispatch:
-    inputs:
-      prepare_sources:
-        description: 'One-time SDK formatting and lockfile bootstrap on the session branch'
-        type: boolean
-        default: false
 
 permissions:
   contents: read
 
 jobs:
-  prepare:
-    if: github.event_name == 'workflow_dispatch' && inputs.prepare_sources && github.ref == 'refs/heads/arena/e27dac95-target'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          flutter-version: '3.38.5'
-          channel: stable
-          cache: true
-      - name: Generate formatter changes and lockfile with the pinned SDK
-        run: |
-          flutter pub get
-          dart format lib test
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- lib test pubspec.lock
-          git commit -m "Format Flutter foundation and lock resolved dependencies"
-          git push origin HEAD:arena/e27dac95-target
-
   verify:
-    if: github.event_name != 'workflow_dispatch' || !inputs.prepare_sources
     name: Flutter 3.38.5 / Web / Android
     runs-on: ubuntu-24.04
     timeout-minutes: 40
