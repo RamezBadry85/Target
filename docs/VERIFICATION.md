@@ -1,5 +1,9 @@
 # Verification record
 
+> This is the historical Phase 1 sandbox record. Phase 1.1 adds a pinned GitHub
+> Actions environment, committed lockfile and formatting gate. See [CI](CI.md)
+> and the linked run status for remote results; local SDK limitations still apply.
+
 ## Sandbox results — 2026-11-02
 
 Host: Linux. No Flutter or Dart executable is installed. Android SDK, Java,

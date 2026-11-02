@@ -62,9 +62,9 @@ has been retained.
 - `flutter_lints`: Dart/Flutter lint baseline (development only).
 
 No database, HTTP, service locator, router or state-management package is needed
-for this shell. No paid backend has been selected. `pubspec.lock` must be generated
-with `flutter pub get` and committed from a Flutter-enabled workstation; this
-sandbox cannot resolve Flutter SDK dependencies.
+for this shell. No paid backend has been selected. `pubspec.lock` is generated with
+Flutter 3.38.5 and committed. CI enforces the locked dependency versions and hashes
+using `flutter pub get --enforce-lockfile`. See [CI verification](docs/CI.md).
 
 ### Platforms and CI
 
@@ -76,6 +76,7 @@ standard template release configuration uses a debug signing key and must not be
 used for production distribution. Apple signing teams and Windows distribution
 signing are deliberately not configured; do not commit signing credentials.
 
-The GitHub Actions workflow checks structural validity, analysis, tests, Web release
-and Android debug builds on pushes/PRs when Actions is available. Windows and Apple
+The GitHub Actions workflow checks SDK versions, structural validity, locked
+dependencies, Dart formatting, analysis, tests, Web release and Android debug
+builds on pushes/PRs and supports manual dispatch. Windows and Apple
 builds still need their native hosts. No repository settings or secrets are changed.

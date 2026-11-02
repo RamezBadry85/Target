@@ -1,5 +1,9 @@
 # Target Phase 1 handoff
 
+> Historical Phase 1 delivery. Phase 1.1 supplies SDK-generated formatting, a
+> committed lockfile and expanded CI verification. See [CI](CI.md) for the current
+> pipeline; the original local verification record below remains unchanged.
+
 ## Delivered source foundation
 
 - Preserved the original README heading; appended setup and scope information.
