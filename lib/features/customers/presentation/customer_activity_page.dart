@@ -22,8 +22,11 @@ class _CustomerActivityPageState extends State<CustomerActivityPage> {
     final text = TextEditingController();
     var type = ActivityType.note;
     var date = DateTime.now();
-    final result = await showDialog<bool>(
+    var saving = false;
+    String? errorMessage;
+    await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialog) => AlertDialog(
           title: Text(s.t('تسجيل نشاط', 'Record activity')),
@@ -33,6 +36,7 @@ class _CustomerActivityPageState extends State<CustomerActivityPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if(errorMessage!=null) Text(errorMessage!,style:TextStyle(color:Theme.of(context).colorScheme.error)),
                   DropdownButtonFormField<ActivityType>(
                     initialValue: type,
                     isExpanded: true,
@@ -85,34 +89,25 @@ class _CustomerActivityPageState extends State<CustomerActivityPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: saving ? null : () => Navigator.pop(context, false),
               child: Text(s.cancel),
             ),
             FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: saving ? null : () async {
+                setDialog(() { saving=true;errorMessage=null; });
+                try {
+                  await widget.repository.addActivity(customer.id,customer.revision,type,text.text,date);
+                  if(context.mounted) Navigator.pop(context,true);
+                } catch(error) { if(context.mounted) setDialog(()=>errorMessage=customerError(error,s)); }
+                finally { if(context.mounted) setDialog(()=>saving=false); }
+              },
               child: Text(s.save),
             ),
           ],
         ),
       ),
     );
-    final content = text.text;
     text.dispose();
-    if (result != true) return;
-    try {
-      await widget.repository.addActivity(
-        customer.id,
-        customer.revision,
-        type,
-        content,
-        date,
-      );
-    } catch (error) {
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(customerError(error, s))));
-    }
   }
 
   @override

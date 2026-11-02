@@ -30,3 +30,7 @@ jobs:
             git commit -m "Resolve and format offline customer module with Flutter 3.38.5"
             git push origin HEAD:arena/e27dac95-target
           fi
+      - name: Analyze prepared customer source
+        run: bash tool/ci_check.sh flutter analyze --no-pub
+      - name: Test prepared customer source
+        run: bash tool/ci_check.sh flutter test --no-pub --reporter expanded
