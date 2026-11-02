@@ -337,8 +337,9 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
         }
         if (restoredCustomers.values.any(
           (other) => CustomerValidation.duplicate(c.data, other.data),
-        ))
+        )) {
           throw const FormatException();
+        }
         restoredCustomers[c.id] = c;
         for (final contact in c.data.contacts) {
           if (!contactIds.add(contact.id)) throw const FormatException();
@@ -380,19 +381,22 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
             snapshot.id != customerId ||
             snapshot.revision != revision ||
             (m['attempts'] as int) < 0 ||
-            m['blocked'] is! bool)
+            m['blocked'] is! bool) {
           throw const FormatException();
+        }
         CustomerValidation.validate(snapshot.data);
         DateTime.parse(m['createdAt'] as String);
-        if (m['nextAttemptAt'] != null)
+        if (m['nextAttemptAt'] != null) {
           DateTime.parse(m['nextAttemptAt'] as String);
+        }
         for (final raw in payload['activities'] as List<Object?>) {
           final activity = CustomerCodec.readActivity(
             Map<String, Object?>.from(raw as Map<Object?, Object?>),
           );
           if (activity.customerId != customerId ||
-              !activityIds.contains(activity.id))
+              !activityIds.contains(activity.id)) {
             throw const FormatException();
+          }
         }
       }
       final conflicted = <String>{};
@@ -405,8 +409,9 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
             !conflicted.add(id) ||
             !operationIds.contains(m['changeId']) ||
             m['remoteSnapshot'] is! Map<Object?, Object?> ||
-            (m['remoteVersion'] as String).isEmpty)
+            (m['remoteVersion'] as String).isEmpty) {
           throw const FormatException();
+        }
         DateTime.parse(m['detectedAt'] as String);
       }
       // Requeue current complete aggregates instead of trusting imported sync
