@@ -78,9 +78,10 @@ void main() {
     await tester.enterText(phone, '01055556666');
     final save = find.byKey(const ValueKey('save-customer'));
     await tester.ensureVisible(save);
+    await tester.pumpAndSettle();
     await tester.runAsync(() async {
       await tester.tap(save);
-      await repo.watchAll().firstWhere((rows) => rows.length == 1);
+      await repo.all();
     });
     await tester.pumpAndSettle();
     expect(
