@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sembast/sembast_memory.dart';
@@ -313,4 +314,13 @@ void main() {
       throwsA(anything),
     );
   });
+  test('malformed outbox in a backup is rejected atomically',() async {
+    await repo.save(draft());
+    final backup=jsonDecode(utf8.decode(await repo.backup())) as Map<String,dynamic>;
+    final outbox=backup['customer_outbox'] as List<dynamic>;
+    (outbox.first as Map<String,dynamic>)['value']=<String,Object?>{'id':'invalid'};
+    final other=LocalCustomerRepository(await openCustomerDatabase(newDatabaseFactoryMemory(),'bad-outbox.db'));
+    try{await expectLater(other.restore(Uint8List.fromList(utf8.encode(jsonEncode(backup)))),throwsA(isA<CustomerException>()));expect(await other.all(),isEmpty);}finally{await other.close();}
+  });
+
 }
