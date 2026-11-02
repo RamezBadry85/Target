@@ -13,7 +13,7 @@ void main() {
   final customer = Customer(
     id: 'export-id',
     data: draft(),
-    createdAt: DateTime.utc(2024),
+    createdAt: DateTime.utc(2024,1,1,13,45),
     updatedAt: DateTime.utc(2025),
     revision: 1,
   );
@@ -36,6 +36,7 @@ void main() {
         expect(rows[1][1]!.value, TextCellValue(customer.data.name));
         expect(rows[1][15]!.value, isA<DoubleCellValue>());
         expect(rows[1][19]!.value, isA<DateTimeCellValue>());
+        expect((rows[1][19]!.value as DateTimeCellValue).asDateTimeUtc(),customer.createdAt);
         expect(
           rows.first.first!.value,
           TextCellValue(arabic ? 'معرف العميل' : 'Customer ID'),
