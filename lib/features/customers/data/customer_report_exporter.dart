@@ -172,14 +172,16 @@ class CustomerReportExporter implements CustomerReports {
         final cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row),
         );
-        if (col == 15 || col == 16)
+        if (col == 15 || col == 16) {
           cell.cellStyle = CellStyle(
             numberFormat: NumFormat.custom(formatCode: '#,##0.00'),
           );
-        if (col >= 19 && col <= 21 && cell.value != null)
+        }
+        if (col >= 19 && col <= 21 && cell.value != null) {
           cell.cellStyle = CellStyle(
             numberFormat: NumFormat.custom(formatCode: 'yyyy-mm-dd hh:mm'),
           );
+        }
       }
     }
     // excel 4 exposes RTL but not AutoFilter/frozen headings. Add standard OOXML

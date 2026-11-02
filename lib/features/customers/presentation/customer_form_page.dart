@@ -124,8 +124,9 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
         });
       }
     } catch (error) {
-      if (mounted)
+      if (mounted) {
         setState(() => _error = customerError(error, CustomerStrings(context)));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -149,22 +150,25 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
           : TextInputType.text,
       validator: (value) {
         final text = value?.trim() ?? '';
-        if (key == 'name' && text.length < 2)
+        if (key == 'name' && text.length < 2) {
           return s.t(
             'أدخل اسماً من حرفين على الأقل',
             'Enter at least two characters',
           );
-        if (key == 'currency' && !RegExp(r'^[A-Za-z]{3}$').hasMatch(text))
+        }
+        if (key == 'currency' && !RegExp(r'^[A-Za-z]{3}$').hasMatch(text)) {
           return s.t(
             'رمز عملة من ثلاثة أحرف مثل EGP',
             'Three-letter currency code, e.g. EGP',
           );
+        }
         if ((key == 'potential' || (key == 'credit' && text.isNotEmpty)) &&
-            CustomerValidation.parseMoney(text) == null)
+            CustomerValidation.parseMoney(text) == null) {
           return s.t(
             'أدخل رقماً موجباً بحد أقصى منزلتين عشريتين',
             'Enter a non-negative amount with at most two decimal places',
           );
+        }
         return null;
       },
     );
@@ -369,29 +373,32 @@ class _CustomerFormPageState extends State<CustomerFormPage> {
                                                 if (entry.key == 'phone' &&
                                                     !CustomerValidation.phone(
                                                       value ?? '',
-                                                    ))
+                                                    )) {
                                                   return s.t(
                                                     'هاتف صالح من 7 إلى 15 رقماً',
                                                     'Valid phone with 7–15 digits required',
                                                   );
+                                                }
                                                 if (entry.key ==
                                                         'alternativePhone' &&
                                                     !CustomerValidation.phone(
                                                       value ?? '',
                                                       optional: true,
-                                                    ))
+                                                    )) {
                                                   return s.t(
                                                     'صيغة الهاتف غير صالحة',
                                                     'Invalid phone format',
                                                   );
+                                                }
                                                 if (entry.key == 'email' &&
                                                     !CustomerValidation.email(
                                                       value ?? '',
-                                                    ))
+                                                    )) {
                                                   return s.t(
                                                     'صيغة البريد غير صالحة',
                                                     'Invalid email format',
                                                   );
+                                                }
                                                 return null;
                                               },
                                             ),

@@ -47,10 +47,11 @@ class CustomerDetailsPage extends StatelessWidget {
     try {
       await repository.setArchived(c.id, c.revision, !c.archived);
     } catch (error) {
-      if (context.mounted)
+      if (context.mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(customerError(error, s))));
+      }
     }
   }
 
@@ -63,13 +64,15 @@ class CustomerDetailsPage extends StatelessWidget {
         stream: repository.watchAll(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return Center(child: Text(s.error));
-          if (!snapshot.hasData)
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
+          }
           final c = snapshot.data!.where((c) => c.id == customerId).firstOrNull;
-          if (c == null)
+          if (c == null) {
             return Center(
               child: Text(s.t('العميل غير موجود', 'Customer not found')),
             );
+          }
           final d = c.data;
           final fields = {
             s.t('معرف العميل', 'Customer ID'): c.id,

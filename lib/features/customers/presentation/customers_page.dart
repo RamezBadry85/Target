@@ -105,7 +105,7 @@ class _CustomersPageState extends State<CustomersPage> {
         );
         if (!saved) return;
       }
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -118,11 +118,13 @@ class _CustomersPageState extends State<CustomersPage> {
             ),
           ),
         );
+      }
     } catch (error) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(customerError(error, s))));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -134,7 +136,7 @@ class _CustomersPageState extends State<CustomersPage> {
     return FutureBuilder<CustomerModule>(
       future: _module,
       builder: (context, initialized) {
-        if (initialized.hasError)
+        if (initialized.hasError) {
           return Card(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -157,14 +159,16 @@ class _CustomersPageState extends State<CustomersPage> {
               ),
             ),
           );
-        if (!initialized.hasData)
+        }
+        if (!initialized.hasData) {
           return const Center(child: CircularProgressIndicator());
+        }
         final module = initialized.data!;
         _stream ??= module.repository.watchAll();
         return StreamBuilder<List<Customer>>(
           stream: _stream,
           builder: (context, snapshot) {
-            if (snapshot.hasError)
+            if (snapshot.hasError) {
               return Column(
                 children: [
                   Text(s.error),
@@ -175,8 +179,10 @@ class _CustomersPageState extends State<CustomersPage> {
                   ),
                 ],
               );
-            if (!snapshot.hasData)
+            }
+            if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
+            }
             final records = snapshot.data!;
             final filtered = query.apply(records);
             final pages = (filtered.length / 25)
@@ -418,7 +424,7 @@ class _CustomersPageState extends State<CustomersPage> {
                 else
                   LayoutBuilder(
                     builder: (context, box) {
-                      if (box.maxWidth < 800)
+                      if (box.maxWidth < 800) {
                         return Column(
                           children: [
                             for (final c in shown)
@@ -435,6 +441,7 @@ class _CustomersPageState extends State<CustomersPage> {
                               ),
                           ],
                         );
+                      }
                       return Card(
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,

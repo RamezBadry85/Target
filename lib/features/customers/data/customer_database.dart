@@ -14,10 +14,11 @@ Future<Database> openCustomerDatabase(
   path,
   version: customerSchemaVersion,
   onVersionChanged: (db, oldVersion, newVersion) async {
-    if (oldVersion > newVersion)
+    if (oldVersion > newVersion) {
       throw StateError(
         'Newer customer database schema; upgrade Target instead of resetting data.',
       );
+    }
     if (oldVersion == 1) {
       // v1 persisted customer profiles; v2 adds durable sync metadata/outbox.
       // Sembast's version-change callback is itself atomic with the version bump.

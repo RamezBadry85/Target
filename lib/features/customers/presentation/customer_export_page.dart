@@ -53,7 +53,7 @@ class _CustomerExportPageState extends State<CustomerExportPage> {
         'Target-Customers-${now.millisecondsSinceEpoch}',
         format,
       );
-      if (mounted)
+      if (mounted) {
         setState(
           () => _message = saved
               ? s.t(
@@ -62,6 +62,7 @@ class _CustomerExportPageState extends State<CustomerExportPage> {
                 )
               : s.t('تم إلغاء الحفظ', 'Save cancelled'),
         );
+      }
     } catch (_) {
       if (mounted) setState(() => _message = s.error);
     } finally {

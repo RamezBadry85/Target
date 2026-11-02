@@ -116,10 +116,11 @@ class _CustomerActivityPageState extends State<CustomerActivityPage> {
                         );
                         if (context.mounted) Navigator.pop(context, true);
                       } catch (error) {
-                        if (context.mounted)
+                        if (context.mounted) {
                           setDialog(
                             () => errorMessage = customerError(error, s),
                           );
+                        }
                       } finally {
                         if (context.mounted) setDialog(() => saving = false);
                       }
@@ -147,8 +148,9 @@ class _CustomerActivityPageState extends State<CustomerActivityPage> {
               ?.where((c) => c.id == widget.customerId)
               .firstOrNull;
           if (snapshot.hasError) return Center(child: Text(s.error));
-          if (customer == null)
+          if (customer == null) {
             return const Center(child: CircularProgressIndicator());
+          }
           return Column(
             children: [
               Padding(
@@ -163,16 +165,19 @@ class _CustomerActivityPageState extends State<CustomerActivityPage> {
                 child: FutureBuilder<List<CustomerActivity>>(
                   future: widget.repository.activities(customer.id),
                   builder: (context, activities) {
-                    if (activities.hasError)
+                    if (activities.hasError) {
                       return Center(child: Text(s.error));
-                    if (!activities.hasData)
+                    }
+                    if (!activities.hasData) {
                       return const Center(child: CircularProgressIndicator());
-                    if (activities.data!.isEmpty)
+                    }
+                    if (activities.data!.isEmpty) {
                       return Center(
                         child: Text(
                           s.t('لا توجد أنشطة مسجلة', 'No recorded activities'),
                         ),
                       );
+                    }
                     return ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: activities.data!.length,

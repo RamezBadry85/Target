@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:file_saver/file_saver.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
@@ -45,8 +44,9 @@ abstract final class DocumentFiles {
       ],
     );
     if (file == null) return null;
-    if (await file.length() > 20 * 1024 * 1024)
+    if (await file.length() > 20 * 1024 * 1024) {
       throw const FormatException('Backup too large');
+    }
     return file.readAsBytes();
   }
 }

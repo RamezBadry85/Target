@@ -44,8 +44,9 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
     final raw = await customerStore.record(id).get(txn);
     if (raw == null) throw const CustomerException(CustomerProblem.missing);
     final c = CustomerCodec.read(raw);
-    if (c.revision != revision)
+    if (c.revision != revision) {
       throw const CustomerException(CustomerProblem.staleEdit);
+    }
     return c;
   }
 
@@ -80,8 +81,9 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
     return db.transaction((txn) async {
       Customer? old;
       if (id != null) {
-        if (expectedRevision == null)
+        if (expectedRevision == null) {
           throw const CustomerException(CustomerProblem.staleEdit);
+        }
         old = await _existing(txn, id, expectedRevision);
       }
       for (final row in await customerStore.find(txn)) {
@@ -89,11 +91,12 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
             CustomerValidation.duplicate(
               draft,
               CustomerCodec.read(row.value).data,
-            ))
+            )) {
           throw CustomerException(
             CustomerProblem.duplicate,
             relatedId: row.key,
           );
+        }
       }
       final now = clock().toUtc();
       final c = Customer(
@@ -148,11 +151,12 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
   }) => _guard(() async {
     if (text.trim().isEmpty ||
         text.length > 10000 ||
-        occurredAt.isAfter(clock().add(const Duration(minutes: 5))))
+        occurredAt.isAfter(clock().add(const Duration(minutes: 5)))) {
       throw const CustomerException(
         CustomerProblem.validation,
         fields: ['activity'],
       );
+    }
     await db.transaction((txn) async {
       final old = await _existing(txn, customerId, expectedRevision);
       final now = clock().toUtc();
@@ -243,8 +247,9 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
             filter: Filter.equals('customerId', change.customerId),
           ),
         );
-        if (remaining.isEmpty && value['syncStatus'] != 'conflict')
+        if (remaining.isEmpty && value['syncStatus'] != 'conflict') {
           value['syncStatus'] = 'synchronized';
+        }
         await customerStore.record(change.customerId).put(txn, value);
       }
     }),
@@ -299,14 +304,16 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
   );
   @override
   Future<void> restore(Uint8List bytes) => _guard(() async {
-    if (bytes.length > 20 * 1024 * 1024)
+    if (bytes.length > 20 * 1024 * 1024) {
       throw const CustomerException(CustomerProblem.invalidBackup);
+    }
     try {
       final root = Map<String, Object?>.from(
         jsonDecode(utf8.decode(bytes)) as Map<Object?, Object?>,
       );
-      if (root['format'] != 'target-customers' || root['version'] != 2)
+      if (root['format'] != 'target-customers' || root['version'] != 2) {
         throw const FormatException();
+      }
       final stores = [customerStore, activityStore, outboxStore, conflictStore];
       final records = <String, List<Map<String, Object?>>>{};
       for (final store in stores) {
@@ -324,8 +331,9 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
         if (c.id != row['key'] ||
             !customerIds.add(c.id) ||
             c.revision < 1 ||
-            c.updatedAt.isBefore(c.createdAt))
+            c.updatedAt.isBefore(c.createdAt)) {
           throw const FormatException();
+        }
         for (final contact in c.data.contacts) {
           if (!contactIds.add(contact.id)) throw const FormatException();
         }
@@ -338,15 +346,17 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
         if (a.id != row['key'] ||
             !customerIds.contains(a.customerId) ||
             !activityIds.add(a.id) ||
-            a.text.trim().isEmpty)
+            a.text.trim().isEmpty) {
           throw const FormatException();
+        }
       }
       // Imported outbox/conflicts are validated for structure but not trusted as
       // acknowledgements. Restores requeue each aggregate for safe reconciliation.
       await db.transaction((txn) async {
         for (final store in stores) {
-          if (await store.count(txn) > 0)
+          if (await store.count(txn) > 0) {
             throw const CustomerException(CustomerProblem.invalidBackup);
+          }
         }
         for (final row in records[activityStore.name]!) {
           await activityStore

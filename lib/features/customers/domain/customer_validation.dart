@@ -47,16 +47,19 @@ abstract final class CustomerValidation {
     final ids = <String>{};
     for (final c in d.contacts) {
       if (c.id.isEmpty || !ids.add(c.id)) errors.add('contacts');
-      if (!phone(c.phone) || !phone(c.alternativePhone, optional: true))
+      if (!phone(c.phone) || !phone(c.alternativePhone, optional: true)) {
         errors.add('phone');
+      }
       if (!email(c.email)) errors.add('email');
       if (c.name.length > 200) errors.add('contactName');
     }
     if (d.potentialMinor < 0 ||
         d.potentialMinor > 99999999999999 ||
         (d.creditLimitMinor != null &&
-            (d.creditLimitMinor! < 0 || d.creditLimitMinor! > 99999999999999)))
+            (d.creditLimitMinor! < 0 ||
+                d.creditLimitMinor! > 99999999999999))) {
       errors.add('money');
+    }
     if (!RegExp(r'^[A-Z]{3}$').hasMatch(d.currency)) errors.add('currency');
     if ([
           d.address,
@@ -67,22 +70,25 @@ abstract final class CustomerValidation {
           d.businessSector,
           d.assignedRepresentativeId,
         ].any((v) => v.length > 500) ||
-        d.notes.length > 10000)
+        d.notes.length > 10000) {
       errors.add('length');
+    }
     return errors.toSet().toList();
   }
 
   static void validate(CustomerDraft d) {
     final fields = errors(d);
-    if (fields.isNotEmpty)
+    if (fields.isNotEmpty) {
       throw CustomerException(CustomerProblem.validation, fields: fields);
+    }
   }
 
   static bool duplicate(CustomerDraft a, CustomerDraft b) {
     if (normalizeText(a.name) == normalizeText(b.name) &&
         normalizeText(a.governorate) == normalizeText(b.governorate) &&
-        normalizeText(a.city) == normalizeText(b.city))
+        normalizeText(a.city) == normalizeText(b.city)) {
       return true;
+    }
     final phones = a.contacts
         .expand((c) => [c.phone, c.alternativePhone])
         .map(normalizePhone)
