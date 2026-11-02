@@ -194,15 +194,19 @@ class CustomerReportExporter implements CustomerReports {
           utf8.decode(file.content as List<int>),
         );
         final root = document.rootElement;
-        final views = root.findElements('sheetViews').firstOrNull;
-        final view = views?.findElements('sheetView').firstOrNull;
-        view?.children.add(
-          XmlElement(XmlName('pane'), [
-            XmlAttribute(XmlName('ySplit'), '1'),
-            XmlAttribute(XmlName('topLeftCell'), 'A2'),
-            XmlAttribute(XmlName('state'), 'frozen'),
-          ]),
-        );
+        // Normalize the worksheet view explicitly: excel 4's RTL change
+        // tracking can be lost when the default worksheet is renamed.
+        for(final old in root.findElements('sheetViews').toList()) { old.remove(); }
+        final view=XmlElement(XmlName('sheetView'),[
+          XmlAttribute(XmlName('workbookViewId'),'0'),
+          XmlAttribute(XmlName('rightToLeft'),arabic ? '1' : '0'),
+        ],[XmlElement(XmlName('pane'),[
+          XmlAttribute(XmlName('ySplit'),'1'),XmlAttribute(XmlName('topLeftCell'),'A2'),
+          XmlAttribute(XmlName('activePane'),'bottomLeft'),XmlAttribute(XmlName('state'),'frozen'),
+        ])]);
+        final views=XmlElement(XmlName('sheetViews'),[],[view]);
+        final before=root.childElements.firstWhere((e)=>['sheetFormatPr','cols','sheetData'].contains(e.name.local));
+        root.children.insert(root.children.indexOf(before),views);
         final filter = XmlElement(XmlName('autoFilter'), [
           XmlAttribute(XmlName('ref'), 'A1:X${customers.length + 1}'),
         ]);
