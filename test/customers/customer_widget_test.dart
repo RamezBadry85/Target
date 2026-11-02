@@ -83,7 +83,10 @@ void main() {
       await repo.watchAll().firstWhere((rows) => rows.length == 1);
     });
     await tester.pumpAndSettle();
-    expect((await tester.runAsync(repo.all))!.single.data.name, 'عميل من النموذج');
+    expect(
+      (await tester.runAsync(repo.all))!.single.data.name,
+      'عميل من النموذج',
+    );
     expect(await tester.runAsync(repo.pendingChanges), hasLength(1));
     expect(tester.takeException(), isNull);
   });
