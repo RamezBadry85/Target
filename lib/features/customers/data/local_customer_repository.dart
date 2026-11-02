@@ -15,6 +15,13 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
   final Database db;
   final DateTime Function() clock;
   final _uuid = const Uuid();
+  DateTime _timestamp(Customer? previous) {
+    final now = clock().toUtc();
+    return previous != null && now.isBefore(previous.updatedAt)
+        ? previous.updatedAt
+        : now;
+  }
+
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();
@@ -98,7 +105,7 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
           );
         }
       }
-      final now = clock().toUtc();
+      final now = _timestamp(old);
       final c = Customer(
         id: id ?? _uuid.v4(),
         data: CustomerCodec.readDraft(CustomerCodec.draft(draft)),
@@ -123,7 +130,7 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
   ) => _guard(
     () => db.transaction((txn) async {
       final old = await _existing(txn, id, expectedRevision);
-      final now = clock().toUtc();
+      final now = _timestamp(old);
       final c = Customer(
         id: id,
         data: old.data,
@@ -159,7 +166,7 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
     }
     await db.transaction((txn) async {
       final old = await _existing(txn, customerId, expectedRevision);
-      final now = clock().toUtc();
+      final now = _timestamp(old);
       final a = CustomerActivity(
         id: _uuid.v4(),
         customerId: customerId,
@@ -443,7 +450,7 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
               id: old.id,
               data: old.data,
               createdAt: old.createdAt,
-              updatedAt: clock().toUtc(),
+              updatedAt: _timestamp(old),
               archivedAt: old.archivedAt,
               revision: old.revision + 1,
               remoteVersion: old.remoteVersion,
