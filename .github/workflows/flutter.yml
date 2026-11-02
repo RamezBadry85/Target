@@ -33,7 +33,7 @@ jobs:
                   data = b'\n'.join(archive.read(name) for name in archive.namelist())
           text = (data + result.stderr).decode('utf-8', errors='replace')
           text = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', text)
-          selected = '\n'.join(text.splitlines()[-160:])
+          selected = '\n'.join(line for line in text.splitlines() if re.search(r'error|failed|exception|not found|sdkmanager|Downloading|Wrong version', line, re.I))[-3800:]
           escaped = selected.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
           print('::notice title=Prior Android failure log::' + escaped)
           PYTHON
