@@ -25,13 +25,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           python3 - <<'PYTHON'
-          import io, subprocess, zipfile
-          result = subprocess.run(['gh', 'api', 'repos/RamezBadry85/Target/actions/jobs/125301714024/logs'], capture_output=True)
+          import io, re, subprocess, zipfile
+          result = subprocess.run(['gh', 'api', '--allow-escape-sequences', 'repos/RamezBadry85/Target/actions/jobs/125301714024/logs'], capture_output=True)
           data = result.stdout
           if data.startswith(b'PK'):
               with zipfile.ZipFile(io.BytesIO(data)) as archive:
                   data = b'\n'.join(archive.read(name) for name in archive.namelist())
           text = (data + result.stderr).decode('utf-8', errors='replace')
+          text = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', text)
           selected = '\n'.join(text.splitlines()[-160:])
           escaped = selected.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
           print('::notice title=Prior Android failure log::' + escaped)
