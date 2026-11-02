@@ -78,7 +78,7 @@ jobs:
         run: bash tool/ci_check.sh flutter test --no-pub --platform chrome test/browser/customer_indexeddb_test.dart
 
       - name: Build Web release
-        run: bash tool/ci_check.sh flutter build web --release --no-pub
+        run: bash tool/ci_check.sh flutter build web --release --no-pub --no-web-resources-cdn
 
       - name: Set up Android command-line tools
         uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4

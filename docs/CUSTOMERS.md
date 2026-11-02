@@ -39,7 +39,8 @@ No aggregate financial arithmetic or exchange rates are implemented.
 
 Fresh databases open at version 2. The explicit v1-to-v2 migration preserves
 profiles, supplies revision/sync metadata and queues them for future sync.
-Version changes are transactional in Sembast. A newer-than-supported schema is
+Record update timestamps do not move backwards when a device clock rolls back;
+local revision, not wall-clock time, orders changes. Version changes are transactional in Sembast. A newer-than-supported schema is
 rejected, never silently reset. Native storage uses Application Support;
 Web uses a named IndexedDB database scoped to the origin/browser profile.
 
@@ -106,6 +107,11 @@ and runs atomically. It does not overwrite an existing book. Current aggregate
 snapshots are requeued for future reconciliation rather than claiming a backup is
 already synchronized. Keep the original backup for forensic/outbox history.
 
+The Web build bundles renderer resources (`--no-web-resources-cdn`) rather than
+requiring the CanvasKit CDN. An initial HTTPS load/install and a stable origin are
+required; air-gapped first installation is not claimed. Browser offline cold-start
+and service-worker upgrade behavior still require deployment acceptance testing.
+
 The browser may evict site storage, private sessions may not persist, and deleting
 site/app data removes local records. The UI warns explicitly. Native OS backups
 are not a substitute for application backups. On corruption/open/quota failure,
@@ -150,3 +156,13 @@ executed results. The existing CI runs formatting, analysis, VM tests, an explic
 Chrome IndexedDB persistence test, Web release and Android debug builds. Native
 Windows/iOS/macOS runtimes and production signing are not established by those
 checks. No operational records are bundled; test fixtures are isolated test data.
+
+
+The pinned-SDK preparation run
+[41462554223](https://github.com/RamezBadry85/Target/actions/runs/41462554223)
+passed analysis and all isolated regression groups: 4 foundation + 6 app widget +
+15 repository/migration/recovery + 5 validation + 5 sync + 7 export + 4 customer
+widget tests (46 total). The temporary write-enabled preparation workflow was
+then removed. Permanent CI uses read-only permissions and a non-mutating format
+check. The final delivery response reports the full-suite, Chrome and build run
+for the delivered revision; preparation alone is not build verification.
