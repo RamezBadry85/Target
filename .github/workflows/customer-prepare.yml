@@ -20,6 +20,7 @@ jobs:
       - name: Resolve and format with pinned SDK
         run: |
           bash tool/ci_check.sh flutter pub get
+          bash tool/ci_check.sh dart fix --apply
           bash tool/ci_check.sh dart format lib test
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
