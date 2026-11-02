@@ -239,7 +239,7 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
       if (!await outboxStore.record(change.id).exists(txn)) return;
       await outboxStore.record(change.id).delete(txn);
       final stored = await customerStore.record(change.customerId).get(txn);
-    final value = stored == null ? null : Map<String,Object?>.from(stored);
+      final value = stored == null ? null : Map<String, Object?>.from(stored);
       if (value != null) {
         value['remoteVersion'] = version;
         final remaining = await outboxStore.find(
@@ -466,12 +466,18 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
         // Preserve snapshots, and point conflict metadata at the recovered
         // blocked operation so a second backup/recovery remains self-consistent.
         for (final row in records[conflictStore.name]!) {
-          final id=row['key'] as String;
-          final value=Map<String,Object?>.from(row['value'] as Map<Object?,Object?>);
-          final recovered=await outboxStore.find(txn,finder:Finder(filter:Filter.equals('customerId',id)));
-          value['originalChangeId']=value['originalChangeId'] ?? value['changeId'];
-          value['changeId']=recovered.single.key;
-          await conflictStore.record(id).put(txn,value);
+          final id = row['key'] as String;
+          final value = Map<String, Object?>.from(
+            row['value'] as Map<Object?, Object?>,
+          );
+          final recovered = await outboxStore.find(
+            txn,
+            finder: Finder(filter: Filter.equals('customerId', id)),
+          );
+          value['originalChangeId'] =
+              value['originalChangeId'] ?? value['changeId'];
+          value['changeId'] = recovered.single.key;
+          await conflictStore.record(id).put(txn, value);
         }
       });
     } on CustomerException {
