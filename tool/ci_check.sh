@@ -10,7 +10,7 @@ for line in sys.stdin:
  print(line,end="",flush=True)
  previous.append(line.rstrip())
  previous=previous[-8:]
- if re.search(r"\[E\]|TimeoutException|EXCEPTION CAUGHT|Expected:|Actual:",line):
+ if re.search(r"^\d{2}:\d{2}.*customer_export_test|\[E\]|TimeoutException|EXCEPTION CAUGHT|Expected:|Actual:",line):
   text="\n".join(previous).replace("%","%25").replace("\r","%0D").replace("\n","%0A")
   print("::notice title=Live test diagnostics::"+text,flush=True)
 ' 

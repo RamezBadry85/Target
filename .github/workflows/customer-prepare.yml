@@ -34,4 +34,8 @@ jobs:
       - name: Analyze prepared customer source
         run: bash tool/ci_check.sh flutter analyze --no-pub
       - name: Test prepared customer source
-        run: bash tool/ci_check.sh flutter test --no-pub --reporter expanded --timeout 2m
+        run: |
+          for file in test/foundation_test.dart test/app_widget_test.dart test/customers/customer_repository_test.dart test/customers/customer_validation_test.dart test/customers/customer_sync_test.dart test/customers/customer_export_test.dart test/customers/customer_widget_test.dart; do
+            echo "::notice title=Running test file::$file"
+            bash tool/ci_check.sh flutter test --no-pub --reporter expanded --timeout 2m "$file"
+          done
