@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/l10n/app_strings.dart';
 import '../core/presentation/responsive_layout.dart';
 import '../core/theme/app_theme.dart';
 import 'app_destination.dart';
+import 'customer_dependencies.dart';
 
 /// Session-only UI state. Business state belongs in feature controllers/use cases.
 class AppShell extends StatefulWidget {
@@ -16,11 +18,14 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
+  final _customers = CustomerDependencies();
+  @override
+  void dispose() { unawaited(_customers.close()); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
-    final destinations = AppDestination.all(widget.onLocaleChanged);
+    final destinations = AppDestination.all(widget.onLocaleChanged, openCustomers: _customers.open);
     final selected = destinations[_selectedIndex];
 
     Widget navigation({required bool drawer}) => SafeArea(

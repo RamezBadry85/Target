@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n/app_strings.dart';
+import '../features/customers/domain/customer_repository.dart';
 import '../features/dashboard/presentation/dashboard_page.dart';
 import '../features/customers/presentation/customers_page.dart';
 import '../features/sales/presentation/sales_page.dart';
@@ -28,7 +29,7 @@ class AppDestination {
 
   String label(AppStrings strings) => strings.choose(arabic, english);
 
-  static List<AppDestination> all(ValueChanged<Locale> onLocaleChanged) => [
+  static List<AppDestination> all(ValueChanged<Locale> onLocaleChanged, {Future<CustomerModule> Function()? openCustomers}) => [
     AppDestination(
       id: 'dashboard',
       arabic: 'لوحة التحكم',
@@ -41,7 +42,7 @@ class AppDestination {
       arabic: 'العملاء',
       english: 'Customers',
       icon: Icons.people_outline,
-      page: const CustomersPage(),
+      page: CustomersPage(openModule: openCustomers ?? () => Future<CustomerModule>.error(StateError('Customer composition is required'))),
     ),
     AppDestination(
       id: 'sales',

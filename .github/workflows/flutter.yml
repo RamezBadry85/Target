@@ -51,11 +51,11 @@ jobs:
 
       - name: Resolve dependencies
         run: |
-          flutter pub get --enforce-lockfile
+          bash tool/ci_check.sh flutter pub get --enforce-lockfile
           git diff --exit-code -- pubspec.lock
 
       - name: Verify Dart formatting
-        run: dart format --output=none --set-exit-if-changed lib test
+        run: bash tool/ci_check.sh dart format --output=none --set-exit-if-changed lib test
 
       - name: Upload verification diagnostics
         if: always()
@@ -69,13 +69,16 @@ jobs:
           if-no-files-found: error
 
       - name: Analyze Dart and Flutter code
-        run: flutter analyze --no-pub
+        run: bash tool/ci_check.sh flutter analyze --no-pub
 
       - name: Run unit and widget tests
-        run: flutter test --no-pub --reporter expanded
+        run: bash tool/ci_check.sh flutter test --no-pub --reporter expanded
+
+      - name: Verify browser IndexedDB persistence
+        run: bash tool/ci_check.sh flutter test --no-pub --platform chrome test/browser/customer_indexeddb_test.dart
 
       - name: Build Web release
-        run: flutter build web --release --no-pub
+        run: bash tool/ci_check.sh flutter build web --release --no-pub
 
       - name: Set up Android command-line tools
         uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4
@@ -88,7 +91,7 @@ jobs:
         run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;35.0.0" "ndk;28.2.13676358"
 
       - name: Build Android debug APK
-        run: flutter build apk --debug --no-pub
+        run: bash tool/ci_check.sh flutter build apk --debug --no-pub
 
       - name: Upload build outputs
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
