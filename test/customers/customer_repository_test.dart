@@ -335,21 +335,30 @@ void main() {
       await other.close();
     }
   });
-  test('clock rollback preserves valid timestamp ordering and revision ordering', () async {
-    var time = DateTime.utc(2025);
-    final timed = LocalCustomerRepository(
-      await openCustomerDatabase(newDatabaseFactoryMemory(), 'clock.db'),
-      clock: () => time,
-    );
-    try {
-      final created = await timed.save(draft());
-      time = DateTime.utc(2024);
-      final edited = await timed.save(draft(name: 'تعديل الساعة'), id: created.id, expectedRevision: 1);
-      expect(edited.updatedAt.isBefore(created.createdAt), isFalse);
-      expect((await timed.pendingChanges()).map((change) => change.revision), [1, 2]);
-    } finally {
-      await timed.close();
-    }
-  });
-
+  test(
+    'clock rollback preserves valid timestamp ordering and revision ordering',
+    () async {
+      var time = DateTime.utc(2025);
+      final timed = LocalCustomerRepository(
+        await openCustomerDatabase(newDatabaseFactoryMemory(), 'clock.db'),
+        clock: () => time,
+      );
+      try {
+        final created = await timed.save(draft());
+        time = DateTime.utc(2024);
+        final edited = await timed.save(
+          draft(name: 'تعديل الساعة'),
+          id: created.id,
+          expectedRevision: 1,
+        );
+        expect(edited.updatedAt.isBefore(created.createdAt), isFalse);
+        expect(
+          (await timed.pendingChanges()).map((change) => change.revision),
+          [1, 2],
+        );
+      } finally {
+        await timed.close();
+      }
+    },
+  );
 }
