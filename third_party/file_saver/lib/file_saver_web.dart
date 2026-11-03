@@ -26,7 +26,7 @@ class FileSaverWeb {
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'saveFile':
-        String args = call.arguments;
+        String args = call.arguments as String;
 
         return downloadFile(FileModel.fromJson(args));
       default:

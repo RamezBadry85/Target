@@ -4,7 +4,11 @@ Origin: https://github.com/incrediblezayed/file_saver, tag v0.3.0,
 commit 98a99a82bf341098b99a0adc2f154256519dc948. Original MIT LICENSE retained.
 Runtime sources and platform build files are vendored; examples/images/upstream
 CI are not. This is not a claim that the upstream git tag equals the pub archive
-byte-for-byte. The application now resolves **these checked-in sources**, not an
+byte-for-byte. A CI audit separately downloaded the original pub archive and
+verified SHA-256 448b1e30142cffe52f37ee085ea9ca50670d5425bb09b649d193549b2dcf6e26
+against the original lockfile. The Android swallowed-write code, macOS error
+string and invalid Windows member were confirmed in that archive as well.
+The application now resolves **these checked-in sources**, not an
 unverified global pub-cache edit. No new runtime package is introduced.
 
 Why vendor rather than upgrade blindly: retain the 0.3.0 API/dependency graph,
@@ -22,6 +26,8 @@ Changes:
   failure, and checks write/close errors using a portable tested IO helper.
 - Android/iOS/macOS normalize dotted extensions (prevent double dots).
 - Web uses display:none and releases blob URLs after browser handoff.
+- Strictly typed method-call arguments and Dio response handling satisfy the
+  application's existing strict analyzer settings; no rules were suppressed.
 
 Regression coverage: app save-outcome tests; native Android DocumentWriter JVM
 unit tests; portable Windows IO/filter C++ tests; native source contract checks.

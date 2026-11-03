@@ -72,7 +72,13 @@ class Dialog(private val activity: Activity) : PluginRegistry.ActivityResultList
             Environment.getExternalStorageDirectory().path
         )
         intent.type = type
-        activity.startActivityForResult(intent, SAVE_FILE)
+        try {
+            activity.startActivityForResult(intent, SAVE_FILE)
+        } catch (e: Exception) {
+            this.result = null
+            this.bytes = null
+            throw e  // Plugin completes the channel error; next save may retry.
+        }
     }
 
     private fun completeFileOperation(uri: Uri) {

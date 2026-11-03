@@ -31,6 +31,12 @@ void main() {
     expect(chunks.join(), text);
     expect(chunks.every((c) => c.startsWith('ب') && c.endsWith('َ')), isTrue);
   });
+  test('explicit line breaks also bound row height without losing text', () {
+    final text = List.filled(500, 'بَ\r\n').join();
+    final chunks = pdfTextChunks(text);
+    expect(chunks.join(), text);
+    expect(chunks.every((c) => '\n'.allMatches(c).length <= 8), isTrue);
+  });
   test('empty input and invalid budgets are explicit', () {
     expect(pdfTextChunks(''), isEmpty);
     expect(() => pdfTextChunks('text', maxGraphemes: 0), throwsArgumentError);

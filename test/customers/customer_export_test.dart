@@ -129,7 +129,10 @@ void main() {
           generatedAt: DateTime.utc(2025),
         ),
       );
-      expect(RegExp(r'/Type\s*/Page\b').allMatches(raw).length, greaterThan(1));
+      expect(
+      RegExp(r'/Type\s*/Page\b').allMatches(raw).length,
+      greaterThan(1),
+    );
     },
   );
   for (final arabic in [true, false]) {
@@ -169,4 +172,30 @@ void main() {
       },
     );
   }
+  test('PDF paginates hundreds of explicit Arabic line breaks', () async {
+    final c = Customer(
+      id: 'newlines',
+      data: CustomerDraft(
+        name: 'عميل',
+        contacts: draft().contacts,
+        notes: List.filled(500, 'بَ\n').join(),
+      ),
+      createdAt: DateTime.utc(2025),
+      updatedAt: DateTime.utc(2025),
+      revision: 1,
+    );
+    final raw = latin1.decode(
+      await exporter.pdf(
+        [c],
+        arabic: true,
+        filters: '',
+        generatedAt: DateTime.utc(2025),
+      ),
+    );
+    expect(
+      RegExp(r'/Type\s*/Page\b').allMatches(raw).length,
+      greaterThan(1),
+    );
+  });
+
 }

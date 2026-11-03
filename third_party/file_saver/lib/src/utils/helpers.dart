@@ -41,20 +41,21 @@ class Helpers {
             responseType: ResponseType.bytes,
           ),
         );
-    Response response = await dio.request(
+    final response = await dio.request<Object?>(
       link.link,
       data: link.body,
       queryParameters: link.queryParameters,
     );
+    final data = response.data;
     if (transformDioResponse != null) {
-      return transformDioResponse(response.data);
+      return transformDioResponse(data);
     } else {
-      if (response.data is Uint8List) {
-        return response.data;
-      } else if (response.data is List<int>) {
-        return Uint8List.fromList(response.data);
-      } else if (response.data is String) {
-        return utf8.encode(response.data);
+      if (data is Uint8List) {
+        return data;
+      } else if (data is List<int>) {
+        return Uint8List.fromList(data);
+      } else if (data is String) {
+        return utf8.encode(data);
       } else {
         throw Exception(
           'Invalid data type, if you have a different response type, then provide the transformDioResponse function',
