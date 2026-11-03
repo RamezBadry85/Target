@@ -129,10 +129,7 @@ void main() {
           generatedAt: DateTime.utc(2025),
         ),
       );
-      expect(
-      RegExp(r'/Type\s*/Page\b').allMatches(raw).length,
-      greaterThan(1),
-    );
+      expect(RegExp(r'/Type\s*/Page\b').allMatches(raw).length, greaterThan(1));
     },
   );
   for (final arabic in [true, false]) {
@@ -192,10 +189,6 @@ void main() {
         generatedAt: DateTime.utc(2025),
       ),
     );
-    expect(
-      RegExp(r'/Type\s*/Page\b').allMatches(raw).length,
-      greaterThan(1),
-    );
+    expect(RegExp(r'/Type\s*/Page\b').allMatches(raw).length, greaterThan(1));
   });
-
 }
