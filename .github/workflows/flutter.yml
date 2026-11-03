@@ -49,10 +49,29 @@ jobs:
       - name: Verify platform scaffolds
         run: python3 tool/verify_scaffold.py
 
+      - name: Run scaffold and native source regressions
+        run: |
+          python3 -m unittest discover -s test/tool -v
+          g++ -std=c++17 -Wall -Wextra -Werror third_party/file_saver/test/file_saver_io_test.cpp -o "$RUNNER_TEMP/file-saver-io-test"
+          "$RUNNER_TEMP/file-saver-io-test"
+
       - name: Resolve dependencies
         run: |
           bash tool/ci_check.sh flutter pub get --enforce-lockfile
           git diff --exit-code -- pubspec.lock
+
+      - name: Formatting diagnostics (does not accept unformatted commits)
+        run: |
+          dart format lib test
+          python3 - <<'PYTHON'
+          import base64, subprocess
+          patch = subprocess.check_output(['git', 'diff', '--', 'lib', 'test'])
+          if patch:
+              encoded = base64.b64encode(patch).decode()
+              for start in range(0, len(encoded), 4000):
+                  print('::notice title=Formatting patch '+str(start//4000)+'::'+encoded[start:start+4000])
+          PYTHON
+          git diff --exit-code -- lib test
 
       - name: Verify Dart formatting
         run: bash tool/ci_check.sh dart format --output=none --set-exit-if-changed lib test
@@ -93,6 +112,13 @@ jobs:
       - name: Build Android debug APK
         run: bash tool/ci_check.sh flutter build apk --debug --no-pub
 
+      - name: Android document writer native regressions
+        working-directory: android
+        run: bash ../tool/ci_check.sh ./gradlew :file_saver:testDebugUnitTest
+
+      - name: Build Android release APK (debug signing only; not distribution signed)
+        run: bash tool/ci_check.sh flutter build apk --release --no-pub
+
       - name: Upload build outputs
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -100,5 +126,40 @@ jobs:
           path: |
             build/web/
             build/app/outputs/flutter-apk/app-debug.apk
+            build/app/outputs/flutter-apk/app-release.apk
+            build/file_saver/test-results/
+          retention-days: 7
+          if-no-files-found: error
+
+  windows:
+    name: Windows release and native IO regressions
+    runs-on: windows-2022
+    timeout-minutes: 40
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - name: Set up Flutter 3.38.5
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: '3.38.5'
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Build Windows release
+        shell: bash
+        run: bash tool/ci_check.sh flutter build windows --release --no-pub
+      - name: Native Windows IO and filter regressions
+        run: |
+          cmake -S third_party/file_saver/test -B "$env:RUNNER_TEMP/saver-tests"
+          cmake --build "$env:RUNNER_TEMP/saver-tests" --config Debug
+          ctest --test-dir "$env:RUNNER_TEMP/saver-tests" -C Debug --output-on-failure
+      - name: Upload Windows release
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: windows-release
+          path: build/windows/x64/runner/Release/
           retention-days: 7
           if-no-files-found: error

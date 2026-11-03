@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.15)
+project(file_saver_io_tests LANGUAGES CXX)
+enable_testing()
+add_executable(file_saver_io_test file_saver_io_test.cpp)
+target_compile_features(file_saver_io_test PRIVATE cxx_std_17)
+add_test(NAME file_saver_io_contract COMMAND file_saver_io_test)

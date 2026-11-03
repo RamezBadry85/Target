@@ -330,7 +330,6 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
             .toList();
       }
       final customerIds = <String>{};
-      final contactIds = <String>{};
       final restoredCustomers = <String, Customer>{};
       for (final row in records[customerStore.name]!) {
         final c = CustomerCodec.read(
@@ -349,9 +348,9 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
           throw const FormatException();
         }
         restoredCustomers[c.id] = c;
-        for (final contact in c.data.contacts) {
-          if (!contactIds.add(contact.id)) throw const FormatException();
-        }
+        // Contacts are embedded in their customer aggregate. Validation above
+        // enforces IDs within that aggregate, just as save does. Preserve IDs
+        // from existing v2 backups; another customer's IDs are a separate scope.
       }
       final activityIds = <String>{};
       for (final row in records[activityStore.name]!) {

@@ -10,3 +10,6 @@ coverage/
 .idea/
 .DS_Store
 *.log
+
+# Python scaffold regression caches
+__pycache__/

@@ -1,3 +1,4 @@
+import 'pdf_text_chunks.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:archive/archive.dart';
@@ -345,13 +346,9 @@ class CustomerReportExporter implements CustomerReports {
     _ => value.toString(),
   };
   List<pw.TableRow> _rows(String label, String value, bool arabic) {
-    // Bound individual row heights even for long notes or 50 contacts.
-    final chunks = <String>[];
-    for (var start = 0; start < value.length; start += 240) {
-      chunks.add(
-        value.substring(start, (start + 240).clamp(0, value.length).toInt()),
-      );
-    }
+    // Keep rows bounded without cutting UTF-16 pairs, Arabic combining marks,
+    // or ordinary words. PDF Text handles shaping and bidi within each row.
+    final chunks = pdfTextChunks(value);
     if (chunks.isEmpty) chunks.add('—');
     return [
       for (final chunk in chunks)

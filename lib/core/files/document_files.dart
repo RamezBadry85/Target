@@ -7,8 +7,10 @@ abstract final class DocumentFiles {
   static Future<bool> save(
     Uint8List bytes,
     String name,
-    String extension,
-  ) async {
+    String extension, {
+    // Injectable boundary for regression tests; production uses the plugin.
+    Future<String?> Function()? nativeSave,
+  }) async {
     final mime = switch (extension) {
       'pdf' => MimeType.pdf,
       'xlsx' => MimeType.microsoftExcel,
@@ -23,13 +25,17 @@ abstract final class DocumentFiles {
       );
       return true; // Browser download requested, not confirmation of disk persistence.
     }
-    return await FileSaver.instance.saveAs(
+    final result = await (nativeSave?.call() ?? FileSaver.instance.saveAs(
           name: name,
           bytes: bytes,
           ext: extension,
           mimeType: mime,
-        ) !=
-        null;
+        ));
+    if (result == null) return false;
+    if (result.trim().isEmpty || result.startsWith('Failed to save')) {
+      throw const FormatException('Invalid file-save acknowledgement');
+    }
+    return true;
   }
 
   static Future<Uint8List?> pickBackup() async {

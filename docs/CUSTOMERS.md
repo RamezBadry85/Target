@@ -26,7 +26,10 @@ No aggregate financial arithmetic or exchange rates are implemented.
   ID, status, potential, credit limit, currency, notes), createdAt, updatedAt,
   archivedAt, local revision, remote version and synchronization state.
 - `contacts` are immutable typed records embedded in the customer aggregate with
-  independent UUIDs, names, primary/alternative phones and email. The form supports
+  independent UUIDs, names, primary/alternative phones and email. Contact identity
+  is scoped to its owning customer: `(customerId, contactId)`. Save and v2 restore
+  both require nonempty, unique IDs within that aggregate. Existing contact IDs
+  are preserved verbatim; no schema migration or identifier rewriting is needed. The form supports
   multiple contacts; the primary phone of each is required.
 - `customer_activities` keyed by activity UUID: customer ID, activity type, text,
   occurredAt, createdAt and optional sourceReference. Business activity types are

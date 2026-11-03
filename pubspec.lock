@@ -50,7 +50,7 @@ packages:
     source: hosted
     version: "2.1.2"
   characters:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: characters
       sha256: f71061c654a3380576a52b451dd5532377954cf9dbd272a78fc8479606670803
@@ -148,10 +148,9 @@ packages:
   file_saver:
     dependency: "direct main"
     description:
-      name: file_saver
-      sha256: "448b1e30142cffe52f37ee085ea9ca50670d5425bb09b649d193549b2dcf6e26"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/file_saver"
+      relative: true
+    source: path
     version: "0.3.0"
   file_selector:
     dependency: "direct main"

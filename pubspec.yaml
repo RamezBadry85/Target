@@ -20,8 +20,11 @@ dependencies:
   uuid: ^4.5.1
   excel: 4.0.6
   pdf: 3.11.3
-  file_saver: 0.3.0
+  # Audited, minimally patched upstream 0.3.0; see third_party/file_saver/PATCHES.md.
+  file_saver:
+    path: third_party/file_saver
   file_selector: ^1.0.3
+  characters: 1.4.0
   archive: ^3.6.1
   xml: ^6.5.0
 

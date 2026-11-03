@@ -16,6 +16,16 @@ def check(condition, message):
     checks += 1
 
 
+launcher = ROOT / 'android/app/src/main/kotlin/com/target/sales/MainActivity.kt'
+check(launcher.is_file(), 'Missing Android launcher source: MainActivity.kt')
+launcher_source = launcher.read_text()
+check('package com.target.sales' in launcher_source, 'Wrong Android launcher package')
+check('class MainActivity : FlutterActivity()' in launcher_source, 'Wrong Android launcher class')
+manifest = ET.parse(ROOT / 'android/app/src/main/AndroidManifest.xml')
+check(any(activity.get('{http://schemas.android.com/apk/res/android}name') == '.MainActivity'
+          for activity in manifest.findall('./application/activity')),
+      'Android manifest must reference .MainActivity')
+
 for platform in ('android', 'ios', 'macos', 'windows', 'web'):
     folder = ROOT / platform
     check(folder.is_dir(), f'Missing platform: {platform}')
