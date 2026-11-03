@@ -244,45 +244,91 @@ void main() {
       }
     },
   );
-  test('v2 backup preserves contact IDs scoped to distinct customers', () async {
-    CustomerDraft entry(String name, String phone) => CustomerDraft(
-      name: name,
-      contacts: [CustomerContact(id: 'legacy-shared-id', name: 'Contact', phone: phone)],
-    );
-    final first = await repo.save(entry('First clinic', '01011111111'));
-    final second = await repo.save(entry('Second clinic', '01022222222'));
-    await repo.addActivity(first.id, first.revision, ActivityType.note, 'Before recovery', DateTime.utc(2025));
-    final backup = await repo.backup();
-    final other = LocalCustomerRepository(await openCustomerDatabase(newDatabaseFactoryMemory(), 'recovered.db'));
-    try {
-      await other.restore(backup);
-      final recovered = await other.all();
-      expect(recovered.map((c) => c.id).toSet(), {first.id, second.id});
-      expect(recovered.every((c) => c.data.contacts.single.id == 'legacy-shared-id'), isTrue);
-      expect(await other.activities(first.id), hasLength(1));
-      expect(await other.pendingChanges(), hasLength(2));
-      for (final original in [first, second]) {
-        final restored = recovered.singleWhere((c) => c.id == original.id);
-        expect(CustomerCodec.draft(restored.data), CustomerCodec.draft(original.data));
-      }
-      final secondRecovery = LocalCustomerRepository(await openCustomerDatabase(newDatabaseFactoryMemory(), 'second-recovery.db'));
+  test(
+    'v2 backup preserves contact IDs scoped to distinct customers',
+    () async {
+      CustomerDraft entry(String name, String phone) => CustomerDraft(
+        name: name,
+        contacts: [
+          CustomerContact(
+            id: 'legacy-shared-id',
+            name: 'Contact',
+            phone: phone,
+          ),
+        ],
+      );
+      final first = await repo.save(entry('First clinic', '01011111111'));
+      final second = await repo.save(entry('Second clinic', '01022222222'));
+      await repo.addActivity(
+        first.id,
+        first.revision,
+        ActivityType.note,
+        'Before recovery',
+        DateTime.utc(2025),
+      );
+      final backup = await repo.backup();
+      final other = LocalCustomerRepository(
+        await openCustomerDatabase(newDatabaseFactoryMemory(), 'recovered.db'),
+      );
       try {
-        await secondRecovery.restore(await other.backup());
-        expect((await secondRecovery.all()).map((c) => c.id).toSet(), {first.id, second.id});
-        expect((await secondRecovery.all()).every((c) => c.data.contacts.single.id == 'legacy-shared-id'), isTrue);
+        await other.restore(backup);
+        final recovered = await other.all();
+        expect(recovered.map((c) => c.id).toSet(), {first.id, second.id});
+        expect(
+          recovered.every(
+            (c) => c.data.contacts.single.id == 'legacy-shared-id',
+          ),
+          isTrue,
+        );
+        expect(await other.activities(first.id), hasLength(1));
+        expect(await other.pendingChanges(), hasLength(2));
+        for (final original in [first, second]) {
+          final restored = recovered.singleWhere((c) => c.id == original.id);
+          expect(
+            CustomerCodec.draft(restored.data),
+            CustomerCodec.draft(original.data),
+          );
+        }
+        final secondRecovery = LocalCustomerRepository(
+          await openCustomerDatabase(
+            newDatabaseFactoryMemory(),
+            'second-recovery.db',
+          ),
+        );
+        try {
+          await secondRecovery.restore(await other.backup());
+          expect((await secondRecovery.all()).map((c) => c.id).toSet(), {
+            first.id,
+            second.id,
+          });
+          expect(
+            (await secondRecovery.all()).every(
+              (c) => c.data.contacts.single.id == 'legacy-shared-id',
+            ),
+            isTrue,
+          );
+        } finally {
+          await secondRecovery.close();
+        }
       } finally {
-        await secondRecovery.close();
+        await other.close();
       }
-    } finally {
-      await other.close();
-    }
-  });
-  test('duplicate IDs within a customer remain invalid and cannot mutate storage', () async {
-    final contact = draft().contacts.single;
-    await expectLater(repo.save(CustomerDraft(name: 'Invalid clinic', contacts: [contact, contact])), throwsA(isA<CustomerException>()));
-    expect(await repo.all(), isEmpty);
-    expect(await repo.pendingChanges(), isEmpty);
-  });
+    },
+  );
+  test(
+    'duplicate IDs within a customer remain invalid and cannot mutate storage',
+    () async {
+      final contact = draft().contacts.single;
+      await expectLater(
+        repo.save(
+          CustomerDraft(name: 'Invalid clinic', contacts: [contact, contact]),
+        ),
+        throwsA(isA<CustomerException>()),
+      );
+      expect(await repo.all(), isEmpty);
+      expect(await repo.pendingChanges(), isEmpty);
+    },
+  );
   test('corrupt backup is rejected without partial writes', () async {
     await expectLater(
       repo.restore(Uint8List.fromList([1, 2, 3])),

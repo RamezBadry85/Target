@@ -133,19 +133,40 @@ void main() {
     },
   );
   for (final arabic in [true, false]) {
-    test('PDF paginates long diacritic Arabic/English and unbroken tokens ($arabic)', () async {
-      final notes = arabic
-          ? List.filled(300, 'نص عَرَبِيّ متصل للاختبار ').join()
-          : List.filled(300, 'Long English text with normal word boundaries. ').join();
-      final c = Customer(
-        id: 'long-regression',
-        data: CustomerDraft(name: arabic ? 'عميل الاختبار' : 'Test customer', contacts: draft().contacts, notes: '$notes\n${List.filled(500, arabic ? 'بَ' : 'x').join()}'),
-        createdAt: DateTime.utc(2025), updatedAt: DateTime.utc(2025), revision: 1,
-      );
-      final raw = latin1.decode(await exporter.pdf([c], arabic: arabic, filters: '', generatedAt: DateTime.utc(2025)));
-      expect(raw, contains('%%EOF'));
-      expect(RegExp(r'/Type\s*/Page\b').allMatches(raw).length, greaterThan(1));
-    });
+    test(
+      'PDF paginates long diacritic Arabic/English and unbroken tokens ($arabic)',
+      () async {
+        final notes = arabic
+            ? List.filled(300, 'نص عَرَبِيّ متصل للاختبار ').join()
+            : List.filled(
+                300,
+                'Long English text with normal word boundaries. ',
+              ).join();
+        final c = Customer(
+          id: 'long-regression',
+          data: CustomerDraft(
+            name: arabic ? 'عميل الاختبار' : 'Test customer',
+            contacts: draft().contacts,
+            notes: '$notes\n${List.filled(500, arabic ? 'بَ' : 'x').join()}',
+          ),
+          createdAt: DateTime.utc(2025),
+          updatedAt: DateTime.utc(2025),
+          revision: 1,
+        );
+        final raw = latin1.decode(
+          await exporter.pdf(
+            [c],
+            arabic: arabic,
+            filters: '',
+            generatedAt: DateTime.utc(2025),
+          ),
+        );
+        expect(raw, contains('%%EOF'));
+        expect(
+          RegExp(r'/Type\s*/Page\b').allMatches(raw).length,
+          greaterThan(1),
+        );
+      },
+    );
   }
-
 }

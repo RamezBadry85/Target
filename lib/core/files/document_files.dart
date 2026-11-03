@@ -25,12 +25,14 @@ abstract final class DocumentFiles {
       );
       return true; // Browser download requested, not confirmation of disk persistence.
     }
-    final result = await (nativeSave?.call() ?? FileSaver.instance.saveAs(
-          name: name,
-          bytes: bytes,
-          ext: extension,
-          mimeType: mime,
-        ));
+    final result =
+        await (nativeSave?.call() ??
+            FileSaver.instance.saveAs(
+              name: name,
+              bytes: bytes,
+              ext: extension,
+              mimeType: mime,
+            ));
     if (result == null) return false;
     if (result.trim().isEmpty || result.startsWith('Failed to save')) {
       throw const FormatException('Invalid file-save acknowledgement');

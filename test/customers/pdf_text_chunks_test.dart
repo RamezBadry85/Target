@@ -12,15 +12,18 @@ void main() {
     expect(chunks.every((s) => s.characters.length <= 240), isTrue);
   });
   for (final word in ['عَرَبِيَّة', 'English']) {
-    test('long $word paragraphs preserve ordinary words and all whitespace', () {
-      final text = List.filled(1000, '$word \n').join();
-      final chunks = pdfTextChunks(text);
-      expect(chunks.join(), text);
-      expect(chunks.length, greaterThan(1));
-      for (final chunk in chunks.take(chunks.length - 1)) {
-        expect(chunk.endsWith(' ') || chunk.endsWith('\n'), isTrue);
-      }
-    });
+    test(
+      'long $word paragraphs preserve ordinary words and all whitespace',
+      () {
+        final text = List.filled(1000, '$word \n').join();
+        final chunks = pdfTextChunks(text);
+        expect(chunks.join(), text);
+        expect(chunks.length, greaterThan(1));
+        for (final chunk in chunks.take(chunks.length - 1)) {
+          expect(chunk.endsWith(' ') || chunk.endsWith('\n'), isTrue);
+        }
+      },
+    );
   }
   test('overlong unbroken tokens wrap only at grapheme boundaries', () {
     final text = List.filled(1000, 'بَ').join();
