@@ -87,18 +87,22 @@ class ReportQuery {
       'Visit', 'Call', 'Meeting', 'Follow-up', 'Quotation (log only)',
       'Sale (log only)', 'Collection (log only)', 'Note',
     ];
-    final typeLabel = type == null
+    final customerType = type;
+    final customerStatus = status;
+    final customerActivity = activityType;
+    final isArchived = archived;
+    final typeLabel = customerType == null
         ? '*'
-        : (ar ? customerTypesAr : customerTypesEn)[type.index];
-    final statusLabel = status == null
+        : (ar ? customerTypesAr : customerTypesEn)[customerType.index];
+    final statusLabel = customerStatus == null
         ? '*'
-        : (ar ? statusesAr : statusesEn)[status.index];
-    final activityLabel = activityType == null
+        : (ar ? statusesAr : statusesEn)[customerStatus.index];
+    final activityLabel = customerActivity == null
         ? '*'
-        : (ar ? activitiesAr : activitiesEn)[activityType.index];
-    final archiveLabel = archived == null
+        : (ar ? activitiesAr : activitiesEn)[customerActivity.index];
+    final archiveLabel = isArchived == null
         ? '*'
-        : archived
+        : isArchived
         ? (ar ? 'مؤرشف' : 'Archived')
         : (ar ? 'غير مؤرشف' : 'Not archived');
     return [

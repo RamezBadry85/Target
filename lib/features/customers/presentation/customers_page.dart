@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../domain/customer.dart';
 import '../domain/customer_repository.dart';
 import 'customer_strings.dart';
-import 'customer_error.dart';
 import 'customer_form_page.dart';
 import 'customer_details_page.dart';
 import 'customer_export_page.dart';
