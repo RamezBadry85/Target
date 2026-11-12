@@ -24,7 +24,7 @@ void main() {
           ),
         ),
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(find.text(locale == 'ar' ? 'مركز التقارير' : 'Reports dashboard'), findsOneWidget);
       expect(find.text('PDF'), findsOneWidget);
       expect(find.text('XLSX'), findsOneWidget);
