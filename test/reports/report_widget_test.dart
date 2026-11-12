@@ -38,6 +38,8 @@ void main() {
     final governorateField = find.widgetWithText(TextField, 'المحافظة');
     expect(governorateField, findsOneWidget);
     await tester.enterText(governorateField, 'الجيزة');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('معاينة / تحديث'));
     await tester.pumpAndSettle();
     expect(find.text('مؤسسة الاختبار'), findsNothing);
