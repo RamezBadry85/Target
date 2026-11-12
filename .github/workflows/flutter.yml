@@ -65,6 +65,7 @@ jobs:
 
       - name: Formatting diagnostics (does not accept unformatted commits)
         run: |
+          dart format lib test
           dart fix --apply --code=curly_braces_in_flow_control_structures,unnecessary_import
           dart format lib test
           python3 - <<'PYTHON'
@@ -72,8 +73,8 @@ jobs:
           patch = subprocess.check_output(['git', 'diff', '--', 'lib', 'test'])
           if patch:
               encoded = base64.b64encode(zlib.compress(patch)).decode()
-              for start in range(0, len(encoded), 50000):
-                  print('::notice title=Compressed formatting patch '+str(start//50000)+'::'+encoded[start:start+50000])
+              for start in range(0, len(encoded), 4000):
+                  print('::notice title=Compressed formatting patch '+str(start//4000)+'::'+encoded[start:start+4000])
           PYTHON
           git diff --exit-code -- lib test
 
@@ -105,6 +106,18 @@ jobs:
         run: |
           python3 -m pip install openpyxl==3.1.5 PyMuPDF==1.26.7
           python3 tool/inspect_report_samples.py "$RUNNER_TEMP/report-samples" --inline-fixtures
+
+      - name: Publish public fixture transport 0
+        run: python3 tool/publish_fixture_slice.py "$RUNNER_TEMP/sample-transport.b64" 0
+
+      - name: Publish public fixture transport 1
+        run: python3 tool/publish_fixture_slice.py "$RUNNER_TEMP/sample-transport.b64" 1
+
+      - name: Publish public fixture transport 2
+        run: python3 tool/publish_fixture_slice.py "$RUNNER_TEMP/sample-transport.b64" 2
+
+      - name: Publish public fixture transport 3
+        run: python3 tool/publish_fixture_slice.py "$RUNNER_TEMP/sample-transport.b64" 3
 
       - name: Upload actual sample reports and renderings
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -181,6 +194,17 @@ jobs:
           TARGET_CROSS_PLATFORM_BACKUP: ${{ runner.temp }}/cross-platform-samples/complete_backup.json
           TARGET_REPORT_SAMPLES: ${{ runner.temp }}/windows-report-samples
         run: bash tool/ci_check.sh flutter test --no-pub test/backup test/reports --reporter expanded --timeout 2m
+      - name: Independently inspect actual Windows-generated report files
+        run: |
+          python -m pip install openpyxl==3.1.5 PyMuPDF==1.26.7
+          python tool/inspect_report_samples.py "$env:RUNNER_TEMP/windows-report-samples"
+      - name: Upload Windows-generated sample outputs
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: windows-report-samples
+          path: ${{ runner.temp }}/windows-report-samples/
+          retention-days: 14
+          if-no-files-found: error
       - name: Build Windows release
         shell: bash
         run: bash tool/ci_check.sh flutter build windows --release --no-pub

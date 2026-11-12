@@ -57,5 +57,6 @@ if '--inline-fixtures' in sys.argv:
                      'activities_en.pdf', 'complete_backup.json', 'manifest.json']:
             archive.write(root / name, name)
     encoded = base64.b64encode(buffer.getvalue()).decode()
-    for start in range(0, len(encoded), 50000):
-        print(f'::notice title=Actual sample files {start//50000}::{encoded[start:start+50000]}')
+    if len(encoded) > 160000:
+        raise ValueError('Public sample transport exceeds its bounded capacity')
+    (root.parent / 'sample-transport.b64').write_text(encoded)

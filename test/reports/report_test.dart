@@ -13,7 +13,7 @@ import '../customers/customer_repository_test.dart' show draft;
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final customer=Customer(id:'fixture-customer',data:draft(),createdAt:DateTime.utc(2025,1,2),updatedAt:DateTime.utc(2025,1,3),revision:1);
-  final activities=[for(final type in ActivityType.values) CustomerActivity(id:type.name,customerId:customer.id,type:type,text:'اختبار عَرَبِيّ / English fixture',occurredAt:DateTime.utc(2025,1,4),createdAt:DateTime.utc(2025,1,4))];
+  final activities=[for(final type in ActivityType.values) CustomerActivity(id:type.name,customerId:customer.id,type:type,text:'اختبار عَرَبِيّ / English fixture',occurredAt:DateTime.utc(2025,1,4,13,45),createdAt:DateTime.utc(2025,1,4))];
   late ReportExporter exporter;
   setUpAll(()async{
     final regular=await rootBundle.load('assets/fonts/Amiri-Regular.ttf');
@@ -43,7 +43,11 @@ void main() {
         final book=Excel.decodeBytes(xlsx);
         expect(book['Records'].rows.length,report.rows.length+1);
         expect(book['Records'].isRTL,arabic);
-        if(kind.index>=ReportKind.activities.index) expect(book['Records'].rows[1][3]!.value,isA<DateTimeCellValue>());
+        if(kind.index>=ReportKind.activities.index) {
+          final cell=book['Records'].rows[1][3]!.value;
+          expect(cell,isA<DateTimeCellValue>());
+          expect((cell! as DateTimeCellValue).asDateTimeUtc(),DateTime.utc(2025,1,4,13,45));
+        }
         if(kind==ReportKind.location || kind==ReportKind.classification) expect(book['Records'].rows[1].last!.value,isA<IntCellValue>());
         if(kind==ReportKind.directory) expect(book['Records'].rows[1][15]!.value,isA<DoubleCellValue>());
         expect(book['Report'].rows[2][1]!.value,IntCellValue(report.rows.length));
