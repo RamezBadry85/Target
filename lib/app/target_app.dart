@@ -22,7 +22,12 @@ class _TargetAppState extends State<TargetApp> {
   Locale _locale = const Locale('ar');
   bool _localeChanged = false;
   final _dependencies = CustomerDependencies();
-  Future<CustomerModule> _open() => widget.openCustomers?.call() ?? _dependencies.open();
+  Future<CustomerModule>? _module;
+  Future<CustomerModule> _open() => _module ??= _initialize();
+  Future<CustomerModule> _initialize() async {
+    try { return await (widget.openCustomers?.call() ?? _dependencies.open()); }
+    catch (_) { _module = null; rethrow; }
+  }
   @override
   void initState() {
     super.initState();

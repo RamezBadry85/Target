@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import io
+import zipfile
 import fitz
 import openpyxl
 
@@ -34,9 +36,6 @@ for path in sorted(root.glob('*')):
         if path.name in ['directory_ar.pdf', 'activities_en.pdf']:
             preview = root / (path.stem + '_preview.png')
             preview.write_bytes(document[0].get_pixmap(matrix=fitz.Matrix(1.3, 1.3)).tobytes('png'))
-            encoded = base64.b64encode(preview.read_bytes()).decode()
-            for start in range(0, len(encoded), 12000):
-                print(f'::notice title=Report preview {preview.name} {start//12000}::{encoded[start:start+12000]}')
         pages = len(document)
         document.close()
     else:
@@ -48,3 +47,15 @@ assert len([r for r in manifest if r['file'].endswith('.xlsx')]) == 12
 assert len([r for r in manifest if r['file'].endswith('.pdf')]) == 13
 (root / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
 print(f'::notice title=Independent output inspection::{len(manifest)} actual files independently parsed; all PDF pages rasterized')
+
+# Optional transport for network-restricted reviewers. Public synthetic fixtures
+# only; never enable this flag for operational customer exports.
+if '--inline-fixtures' in sys.argv:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+        for name in ['directory_ar.xlsx', 'directory_ar.pdf', 'activities_en.xlsx',
+                     'activities_en.pdf', 'complete_backup.json', 'manifest.json']:
+            archive.write(root / name, name)
+    encoded = base64.b64encode(buffer.getvalue()).decode()
+    for start in range(0, len(encoded), 50000):
+        print(f'::notice title=Actual sample files {start//50000}::{encoded[start:start+50000]}')

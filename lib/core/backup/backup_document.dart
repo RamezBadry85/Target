@@ -63,7 +63,7 @@ class BackupDocument {
       throw const FormatException('Incompatible backup or schema');
     }
     final doc = BackupDocument._(body);
-    doc.createdAt;
+    DateTime.parse(body['createdAt']! as String);
     if (body['appVersion'] is! String || doc.payload['format'] != 'target-customers' || doc.payload['version'] != 2 ||
         digest(doc.counts) != digest(recordCounts(doc.payload))) {
       throw const FormatException('Invalid manifest');

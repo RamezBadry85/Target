@@ -65,14 +65,15 @@ jobs:
 
       - name: Formatting diagnostics (does not accept unformatted commits)
         run: |
+          dart fix --apply --code=curly_braces_in_flow_control_structures,unnecessary_import
           dart format lib test
           python3 - <<'PYTHON'
-          import base64, subprocess
+          import base64, subprocess, zlib
           patch = subprocess.check_output(['git', 'diff', '--', 'lib', 'test'])
           if patch:
-              encoded = base64.b64encode(patch).decode()
-              for start in range(0, len(encoded), 4000):
-                  print('::notice title=Formatting patch '+str(start//4000)+'::'+encoded[start:start+4000])
+              encoded = base64.b64encode(zlib.compress(patch)).decode()
+              for start in range(0, len(encoded), 50000):
+                  print('::notice title=Compressed formatting patch '+str(start//50000)+'::'+encoded[start:start+50000])
           PYTHON
           git diff --exit-code -- lib test
 
@@ -103,7 +104,7 @@ jobs:
       - name: Independently inspect generated report files
         run: |
           python3 -m pip install openpyxl==3.1.5 PyMuPDF==1.26.7
-          python3 tool/inspect_report_samples.py "$RUNNER_TEMP/report-samples"
+          python3 tool/inspect_report_samples.py "$RUNNER_TEMP/report-samples" --inline-fixtures
 
       - name: Upload actual sample reports and renderings
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -152,6 +153,7 @@ jobs:
           if-no-files-found: error
 
   windows:
+    needs: verify
     name: Windows release and native IO regressions
     runs-on: windows-2022
     timeout-minutes: 40
@@ -168,6 +170,17 @@ jobs:
           cache: true
       - name: Resolve dependencies
         run: flutter pub get --enforce-lockfile
+      - name: Download portable fixture generated on Linux
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: report-samples
+          path: ${{ runner.temp }}/cross-platform-samples
+      - name: Verify reporting and portable recovery on Windows
+        shell: bash
+        env:
+          TARGET_CROSS_PLATFORM_BACKUP: ${{ runner.temp }}/cross-platform-samples/complete_backup.json
+          TARGET_REPORT_SAMPLES: ${{ runner.temp }}/windows-report-samples
+        run: bash tool/ci_check.sh flutter test --no-pub test/backup test/reports --reporter expanded --timeout 2m
       - name: Build Windows release
         shell: bash
         run: bash tool/ci_check.sh flutter build windows --release --no-pub
