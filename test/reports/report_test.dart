@@ -84,6 +84,7 @@ void main() {
         const ReportQuery(city: 'other'),
         const ReportQuery(classification: 'other'),
         const ReportQuery(type: CustomerType.hospital),
+        const ReportQuery(status: CustomerStatus.active),
         const ReportQuery(archived: true),
       ]) {
         expect(
@@ -135,9 +136,12 @@ void main() {
         contains('عيادة'),
       );
       expect(
-        const ReportQuery(activityType: ActivityType.phoneCall, archived: false)
-            .describe(false),
-        contains('Call / Not archived'),
+        const ReportQuery(
+          status: CustomerStatus.active,
+          activityType: ActivityType.phoneCall,
+          archived: false,
+        ).describe(false),
+        contains('Active / Call / Not archived'),
       );
     },
   );

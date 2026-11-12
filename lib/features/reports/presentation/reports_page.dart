@@ -23,6 +23,7 @@ class _ReportsPageState extends State<ReportsPage> {
       _classification = TextEditingController();
   ReportKind _kind = ReportKind.directory;
   CustomerType? _type;
+  CustomerStatus? _status;
   ActivityType? _activity;
   bool? _archived;
   bool _all = false, _busy = false;
@@ -88,6 +89,7 @@ class _ReportsPageState extends State<ReportsPage> {
               city: _city.text.trim(),
               classification: _classification.text.trim(),
               type: _type,
+              status: _status,
               activityType: _activity,
               archived: _archived,
               from: _dates?.start.toUtc(),
@@ -221,6 +223,25 @@ class _ReportsPageState extends State<ReportsPage> {
                 ),
               ],
               onChanged: _busy ? null : (v) => setState(() => _type = v),
+            ),
+          ),
+          SizedBox(
+            width: 240,
+            child: DropdownButtonFormField<CustomerStatus>(
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: t('حالة العميل', 'Customer status'),
+              ),
+              items: [
+                DropdownMenuItem(child: Text(t('الكل', 'All'))),
+                ...CustomerStatus.values.map(
+                  (v) => DropdownMenuItem(
+                    value: v,
+                    child: Text(CustomerReportExporter.statusLabel(v, ar)),
+                  ),
+                ),
+              ],
+              onChanged: _busy ? null : (v) => setState(() => _status = v),
             ),
           ),
           SizedBox(

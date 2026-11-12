@@ -13,7 +13,7 @@ Open **Analytics & reports / التحليلات والتقارير** in the appl
 
 An activity such as “sale” or “collection” is a descriptive activity-log entry only; it is not a sales/collection transaction report. Reports do not invent data for the placeholder sales, collection or quotation modules.
 
-Filters include inclusive local date-range selection (start and end calendar days), governorate, city, customer type, classification, activity type, and archive status. The date interval is `[start, day-after-end)`: customer reports filter by customer creation time; activity reports filter by activity occurrence time. “All records” deliberately ignores the selected filters; otherwise, current filters are applied. The preview is limited to 20 rows; exported results are not truncated.
+Filters include inclusive local date-range selection (start and end calendar days), governorate, city, customer type, customer status (prospect/active/inactive), classification, activity type, and archived/not-archived state. The date interval is `[start, day-after-end)`: customer reports filter by customer creation time; activity reports filter by activity occurrence time. “All records” deliberately ignores the selected filters; otherwise, current filters are applied. The preview is limited to 20 rows; exported results are not truncated.
 
 Each XLSX contains `Records` and `Report` worksheets. The records sheet has a frozen header, AutoFilter, RTL sheet direction for Arabic, typed date/number cells, suitable widths, and a summary with the generation timestamp, result-row count, matched-record count, and selected filters. Arabic/English headers follow the selected application language.
 

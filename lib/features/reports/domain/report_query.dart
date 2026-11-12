@@ -33,12 +33,14 @@ class ReportQuery {
     this.city = '',
     this.classification = '',
     this.type,
+    this.status,
     this.activityType,
     this.archived,
   });
   final DateTime? from, until;
   final String governorate, city, classification;
   final CustomerType? type;
+  final CustomerStatus? status;
   final ActivityType? activityType;
   final bool? archived;
   bool dateMatches(DateTime date) =>
@@ -61,6 +63,7 @@ class ReportQuery {
                     normalizeText(classification) ==
                         normalizeText(c.data.classification)) &&
                 (type == null || type == c.data.type) &&
+                (status == null || status == c.data.status) &&
                 (!applyDates || dateMatches(c.createdAt)),
           )
           .toList()
@@ -74,6 +77,8 @@ class ReportQuery {
       'Hospital', 'Clinic', 'Medical center', 'University',
       'Government healthcare', 'Private healthcare', 'Distributor', 'Other organization',
     ];
+    const statusesAr = ['محتمل', 'نشط', 'غير نشط'];
+    const statusesEn = ['Prospect', 'Active', 'Inactive'];
     const activitiesAr = [
       'زيارة', 'مكالمة', 'اجتماع', 'متابعة', 'عرض سعر (سجل وصفي)',
       'بيع (سجل وصفي)', 'تحصيل (سجل وصفي)', 'ملاحظة',
@@ -85,6 +90,9 @@ class ReportQuery {
     final typeLabel = type == null
         ? '*'
         : (ar ? customerTypesAr : customerTypesEn)[type!.index];
+    final statusLabel = status == null
+        ? '*'
+        : (ar ? statusesAr : statusesEn)[status!.index];
     final activityLabel = activityType == null
         ? '*'
         : (ar ? activitiesAr : activitiesEn)[activityType!.index];
@@ -99,7 +107,7 @@ class ReportQuery {
           : 'Dates: customer creation / activity occurrence; end exclusive',
       '${from?.toUtc().toIso8601String() ?? "—"} / ${until?.toUtc().toIso8601String() ?? "—"}',
       '${ar ? "المحافظة / المدينة / التصنيف" : "Governorate / city / classification"}: $governorate / $city / $classification',
-      '${ar ? "نوع العميل / النشاط / الأرشيف" : "Customer type / activity / archive"}: $typeLabel / $activityLabel / $archiveLabel',
+      '${ar ? "نوع العميل / الحالة / النشاط / الأرشيف" : "Customer type / status / activity / archive"}: $typeLabel / $statusLabel / $activityLabel / $archiveLabel',
     ].join(' · ');
   }
 }
