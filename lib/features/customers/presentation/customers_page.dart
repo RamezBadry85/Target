@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/files/document_files.dart';
 import '../domain/customer.dart';
 import '../domain/customer_repository.dart';
 import 'customer_strings.dart';
@@ -24,7 +23,7 @@ class _CustomersPageState extends State<CustomersPage> {
       _classification = TextEditingController();
   CustomerType? _type;
   CustomerSort _sort = CustomerSort.name;
-  bool _archived = false, _descending = false, _busy = false;
+  bool _archived = false, _descending = false;
   int _page = 0;
   @override
   void initState() {
@@ -64,71 +63,6 @@ class _CustomersPageState extends State<CustomersPage> {
       '${s.label('classification')}: ${_classification.text}',
     if (_type != null) s.type(_type!),
   ].join(' · ');
-  Future<void> _backup(CustomerModule module, bool restore) async {
-    final s = CustomerStrings(context);
-    if (restore) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(s.t('استعادة نسخة احتياطية', 'Restore backup')),
-          content: Text(
-            s.t(
-              'الاستعادة متاحة لمساحة عمل فارغة فقط. لا تمسح بيانات المتصفح أو التطبيق قبل التأكد من سلامة نسختك. الملفات غير مشفرة وتحتاج حفظاً آمناً.',
-              'Restore is only allowed in an empty workspace. Never clear app/browser data before validating a backup. Backups are unencrypted and must be stored securely.',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(s.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(s.t('اختيار ملف', 'Choose file')),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true) return;
-    }
-    setState(() => _busy = true);
-    try {
-      if (restore) {
-        final bytes = await DocumentFiles.pickBackup();
-        if (bytes == null) return;
-        await module.repository.restore(bytes);
-      } else {
-        final saved = await DocumentFiles.save(
-          await module.repository.backup(),
-          'Target-Customers-Backup-${DateTime.now().millisecondsSinceEpoch}',
-          'json',
-        );
-        if (!saved) return;
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              restore
-                  ? s.t('تمت الاستعادة محلياً', 'Restored locally')
-                  : s.t(
-                      'تم تسليم النسخة إلى نظام الحفظ / تنزيل المتصفح',
-                      'Backup handed to the save dialog / browser download',
-                    ),
-            ),
-          ),
-        );
-      }
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(customerError(error, s))));
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,56 +148,31 @@ class _CustomersPageState extends State<CustomersPage> {
                     ),
                     FilledButton.icon(
                       key: const ValueKey('add-customer'),
-                      onPressed: _busy
-                          ? null
-                          : () => Navigator.push<bool>(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CustomerFormPage(
-                                  repository: module.repository,
-                                ),
-                              ),
-                            ),
+                      onPressed: () => Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CustomerFormPage(
+                            repository: module.repository,
+                          ),
+                        ),
+                      ),
                       icon: const Icon(Icons.add),
                       label: Text(s.t('إضافة عميل', 'Add customer')),
                     ),
                     OutlinedButton.icon(
-                      onPressed: _busy
-                          ? null
-                          : () => Navigator.push<void>(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CustomerExportPage(
-                                  module: module,
-                                  records: List.unmodifiable(records),
-                                  query: query,
-                                  filterDescription: _description(s),
-                                ),
-                              ),
-                            ),
-                      icon: const Icon(Icons.download_outlined),
-                      label: Text(s.t('تصدير', 'Export')),
-                    ),
-                    PopupMenuButton<String>(
-                      enabled: !_busy,
-                      tooltip: s.t(
-                        'نسخ احتياطي واستعادة',
-                        'Backup and recovery',
-                      ),
-                      onSelected: (value) =>
-                          _backup(module, value == 'restore'),
-                      itemBuilder: (_) => [
-                        PopupMenuItem(
-                          value: 'backup',
-                          child: Text(s.t('نسخة احتياطية JSON', 'JSON backup')),
-                        ),
-                        PopupMenuItem(
-                          value: 'restore',
-                          child: Text(
-                            s.t('استعادة نسخة احتياطية', 'Restore backup'),
+                      onPressed: () => Navigator.push<void>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CustomerExportPage(
+                            module: module,
+                            records: List.unmodifiable(records),
+                            query: query,
+                            filterDescription: _description(s),
                           ),
                         ),
-                      ],
+                      ),
+                      icon: const Icon(Icons.download_outlined),
+                      label: Text(s.t('تصدير', 'Export')),
                     ),
                   ],
                 ),
@@ -405,7 +314,6 @@ class _CustomersPageState extends State<CustomersPage> {
                     ),
                   ],
                 ),
-                if (_busy) const LinearProgressIndicator(),
                 const SizedBox(height: 16),
                 Text('${s.t('النتائج', 'Results')}: ${filtered.length}'),
                 const SizedBox(height: 8),
