@@ -89,16 +89,16 @@ class ReportQuery {
     ];
     final typeLabel = type == null
         ? '*'
-        : (ar ? customerTypesAr : customerTypesEn)[type!.index];
+        : (ar ? customerTypesAr : customerTypesEn)[type.index];
     final statusLabel = status == null
         ? '*'
-        : (ar ? statusesAr : statusesEn)[status!.index];
+        : (ar ? statusesAr : statusesEn)[status.index];
     final activityLabel = activityType == null
         ? '*'
-        : (ar ? activitiesAr : activitiesEn)[activityType!.index];
+        : (ar ? activitiesAr : activitiesEn)[activityType.index];
     final archiveLabel = archived == null
         ? '*'
-        : archived!
+        : archived
         ? (ar ? 'مؤرشف' : 'Archived')
         : (ar ? 'غير مؤرشف' : 'Not archived');
     return [
