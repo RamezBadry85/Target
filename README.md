@@ -3,11 +3,13 @@
 
 ## Sales Management System — Customer phase
 
-An Arabic-first, responsive Flutter foundation for a single Sales Manager.
-Customer management now includes offline local storage, profiles, activities,
-archive/restore, backup recovery and XLSX/PDF generation. Other business modules,
+An Arabic-first, responsive Flutter application foundation for a single Sales Manager.
+Customer management includes offline local storage, profiles, activities, archive/restore,
+portable complete backup, and customer/activity XLSX/PDF reports. Other business modules,
 inventory, authentication and cloud synchronization are **not implemented**.
-No operational sample data is bundled. See [Customer architecture](docs/CUSTOMERS.md).
+No operational sample data is bundled. See [Customer architecture](docs/CUSTOMERS.md),
+[Reporting and backup operations](docs/REPORTING_AND_BACKUP.md), and the
+[portable backup format](docs/PORTABLE_BACKUP_FORMAT.md).
 
 ### Getting started
 
@@ -23,10 +25,11 @@ flutter run -d chrome
 ```
 
 Arabic is the default language. Use the language action or Settings to switch to
-English. Language and navigation selection are session-only until persistence is
-introduced. Localizations provide RTL/LTR automatically. Wide screens (1100 logical
-pixels and above) use a sidebar; smaller screens use a scrollable navigation drawer.
-All ten modules are accessible from either navigation mode.
+English; the selected language is stored with local workspace settings and included
+in portable backups. Localizations provide RTL/LTR automatically. Wide screens
+(1100 logical pixels and above) use a sidebar; smaller screens use a scrollable
+drawer. Reports and Backup are connected to customer data; reserved business
+modules remain clearly separate from implemented transaction records.
 
 ### Structure
 
@@ -35,7 +38,9 @@ lib/
   main.dart                    # Bootstrap and error hooks
   app/                         # Composition root, destinations, responsive shell
   core/
+    backup/                    # Portable integrity-checked backup/recovery and UI
     errors/                    # Domain-safe failure classification
+    files/                     # Native save/open integration
     logging/                   # Central technical logging
     l10n/                      # Arabic/English copy and delegate
     theme/                     # Navy/white theme, shared spacing, form/table styles
@@ -43,9 +48,9 @@ lib/
   features/
     dashboard/ customers/ sales/ quotations/ opportunities/
     follow_ups/ sales_targets/ collections/ reports/ settings/
-      domain/                  # Customer models/contracts; other modules reserved
-      data/                    # Customer database/exports; other modules reserved
-      presentation/            # Customer workspace; other modules placeholders
+      domain/                  # Customer models/contracts; report query/records
+      data/                    # Database/exports and report generation
+      presentation/            # Workspaces, report dashboard and placeholders
 android/ ios/ windows/ web/ macos/  # Unverified native/web host scaffolds
 test/                         # Unit and widget tests
 tool/                         # Structural checks, reproducible icon generation
@@ -63,10 +68,11 @@ has been retained.
 - `flutter_test`: SDK test tooling (development only).
 - `flutter_lints`: Dart/Flutter lint baseline (development only).
 
-The customer phase adds Sembast/IndexedDB, path utilities, UUIDs, report generation
-and file-save/picker adapters; see `pubspec.yaml` and `docs/CUSTOMERS.md` for purposes.
-No paid backend has been selected. `pubspec.lock` is generated with
-Flutter 3.38.5 and committed. CI enforces the locked dependency versions and hashes
+The customer phase uses Sembast/IndexedDB, path utilities, UUIDs, XLSX/PDF generation,
+SHA-256 (`crypto`), ZIP/XML support, and native file-save/picker adapters; see
+`pubspec.yaml`, [customer architecture](docs/CUSTOMERS.md), and the reporting/backup
+guides for details. No paid backend has been selected. `pubspec.lock` is generated
+with Flutter 3.38.5 and committed. CI enforces locked dependency versions and hashes
 using `flutter pub get --enforce-lockfile`. See [CI verification](docs/CI.md).
 
 ### Platforms and CI
@@ -80,6 +86,10 @@ used for production distribution. Apple signing teams and Windows distribution
 signing are deliberately not configured; do not commit signing credentials.
 
 The GitHub Actions workflow checks SDK versions, structural validity, locked
-dependencies, Dart formatting, analysis, VM and Chrome persistence tests, Web release and Android debug
-builds on pushes/PRs and supports manual dispatch. Windows and Apple
-builds still need their native hosts. No repository settings or secrets are changed.
+dependencies, Dart formatting, strict analysis, VM/Chrome persistence and report/backup
+tests, Web and Android builds, Android document-writer JVM tests, and Windows Release
+plus native IO tests on pushes/PRs and manual dispatch. CI independently opens generated
+XLSX fixtures, parses and rasterizes generated A4 PDFs, and exercises portable backup
+recovery on Windows using a Linux-generated fixture. These checks do not replace
+interactive device/desktop acceptance or production signing. No repository settings
+or secrets are changed.

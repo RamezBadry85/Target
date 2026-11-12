@@ -31,6 +31,15 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a saved locale is restored at startup', (tester) async {
+    await customers.saveLocale('en');
+    await tester.pumpWidget(TargetApp(openCustomers: () async => module));
+    await tester.pumpAndSettle();
+    expect(Localizations.localeOf(tester.element(find.text('Dashboard'))).languageCode, 'en');
+    expect(Directionality.of(tester.element(find.text('Dashboard'))), TextDirection.ltr);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final width in [360.0, 800.0, 1440.0]) {
     testWidgets('navigation and layout at width $width', (tester) async {
       tester.view.physicalSize = Size(width, 900);
@@ -75,6 +84,7 @@ void main() {
       'sales_targets',
       'collections',
       'reports',
+      'backup',
       'settings',
     ]) {
       final item = find.byKey(ValueKey('nav-$id'));
@@ -88,6 +98,7 @@ void main() {
     final context = tester.element(find.text('Language'));
     expect(Localizations.localeOf(context).languageCode, 'en');
     expect(Directionality.of(context), TextDirection.ltr);
+    expect((await customers.readSettings())['locale'], 'en');
     expect(find.text('Settings'), findsNWidgets(2));
     await tester.tap(find.text('العربية'));
     await tester.pumpAndSettle();
