@@ -100,6 +100,26 @@ void main() {
       );
     },
   );
+  test('unknown fields and stores are rejected rather than dropped', () async {
+    final document = await BackupService(source).create();
+    final root = jsonDecode(utf8.decode(document.encode()))
+        as Map<String, dynamic>;
+    final body = root['body'] as Map<String, dynamic>;
+    final payload = body['payload'] as Map<String, dynamic>;
+    payload['future_store'] = <Object?>[];
+    root['checksum'] = {
+      'algorithm': 'SHA-256',
+      'value': BackupDocument.digest(body),
+    };
+    await expectLater(
+      BackupService(destination).restore(
+        Uint8List.fromList(utf8.encode(jsonEncode(root))),
+      ),
+      throwsA(isA<FormatException>()),
+    );
+    expect(await destination.all(), isEmpty);
+  });
+
   test(
     'nonempty workspace cannot restore without confirmation and safety backup',
     () async {

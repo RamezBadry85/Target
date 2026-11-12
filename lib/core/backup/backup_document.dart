@@ -33,6 +33,8 @@ class BackupDocument {
 
   static String digest(Object? value) =>
       sha256.convert(utf8.encode(jsonEncode(canonical(value)))).toString();
+  static bool _hasKeys(Map<String, Object?> value, Set<String> expected) =>
+      value.keys.length == expected.length && value.keys.toSet().containsAll(expected);
   static String fingerprint(Map<String, Object?> snapshot) {
     final payload = Map<String, Object?>.from(
       snapshot['payload']! as Map<Object?, Object?>,
@@ -93,16 +95,34 @@ class BackupDocument {
     if (bytes.length > 20 * 1024 * 1024) {
       throw const FormatException('Backup exceeds 20 MiB');
     }
-    final root = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+    final root = Map<String, Object?>.from(
+      jsonDecode(utf8.decode(bytes)) as Map<Object?, Object?>,
+    );
+    if (!_hasKeys(root, {'body', 'checksum'})) {
+      throw const FormatException('Unsupported backup envelope');
+    }
     final body = Map<String, Object?>.from(
       root['body'] as Map<Object?, Object?>,
     );
-    final checksum = root['checksum'] as Map<Object?, Object?>;
-    if (checksum['algorithm'] != 'SHA-256' ||
+    final checksum = Map<String, Object?>.from(
+      root['checksum'] as Map<Object?, Object?>,
+    );
+    if (!_hasKeys(checksum, {'algorithm', 'value'}) ||
+        checksum['algorithm'] != 'SHA-256' ||
         checksum['value'] != digest(body)) {
       throw const FormatException('Backup integrity check failed');
     }
-    if (body['format'] != 'target-complete-backup' ||
+    if (!_hasKeys(body, {
+          'format',
+          'formatVersion',
+          'appVersion',
+          'schemaVersion',
+          'createdAt',
+          'counts',
+          'settings',
+          'payload',
+        }) ||
+        body['format'] != 'target-complete-backup' ||
         body['formatVersion'] != 1 ||
         body['schemaVersion'] != 2) {
       throw const FormatException('Incompatible backup or schema');
@@ -110,8 +130,15 @@ class BackupDocument {
     final doc = BackupDocument._(body);
     DateTime.parse(body['createdAt']! as String);
     if (body['appVersion'] is! String ||
+        !_hasKeys(doc.payload, {
+          'format',
+          'version',
+          'generatedAt',
+          ...stores,
+        }) ||
         doc.payload['format'] != 'target-customers' ||
         doc.payload['version'] != 2 ||
+        !_hasKeys(doc.counts, {...stores, 'contacts'}) ||
         digest(doc.counts) != digest(recordCounts(doc.payload))) {
       throw const FormatException('Invalid manifest');
     }
