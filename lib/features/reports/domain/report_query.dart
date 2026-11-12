@@ -1,30 +1,74 @@
 import '../../customers/domain/customer.dart';
 
-enum ReportKind { directory, location, classification, activities, visits, calls }
+enum ReportKind {
+  directory,
+  location,
+  classification,
+  activities,
+  visits,
+  calls,
+}
+
 class ReportTable {
-  ReportTable(this.title, this.headers, this.rows, this.generatedAt, this.filters, {int? recordCount}) : recordCount = recordCount ?? rows.length;
+  ReportTable(
+    this.title,
+    this.headers,
+    this.rows,
+    this.generatedAt,
+    this.filters, {
+    int? recordCount,
+  }) : recordCount = recordCount ?? rows.length;
   final int recordCount;
   final String title, filters;
   final List<String> headers;
   final List<List<Object?>> rows;
   final DateTime generatedAt;
 }
+
 class ReportQuery {
-  const ReportQuery({this.from, this.until, this.governorate = '', this.city = '', this.classification = '', this.type, this.activityType, this.archived});
+  const ReportQuery({
+    this.from,
+    this.until,
+    this.governorate = '',
+    this.city = '',
+    this.classification = '',
+    this.type,
+    this.activityType,
+    this.archived,
+  });
   final DateTime? from, until;
   final String governorate, city, classification;
   final CustomerType? type;
   final ActivityType? activityType;
   final bool? archived;
-  bool dateMatches(DateTime date) => (from == null || !date.isBefore(from!)) && (until == null || date.isBefore(until!));
-  List<Customer> customers(Iterable<Customer> records, {bool applyDates = true}) => records.where((c) =>
-    (archived == null || archived == c.archived) &&
-    (governorate.isEmpty || normalizeText(governorate) == normalizeText(c.data.governorate)) &&
-    (city.isEmpty || normalizeText(city) == normalizeText(c.data.city)) &&
-    (classification.isEmpty || normalizeText(classification) == normalizeText(c.data.classification)) &&
-    (type == null || type == c.data.type) && (!applyDates || dateMatches(c.createdAt))).toList()..sort((a,b)=> a.id.compareTo(b.id));
+  bool dateMatches(DateTime date) =>
+      (from == null || !date.isBefore(from!)) &&
+      (until == null || date.isBefore(until!));
+  List<Customer> customers(
+    Iterable<Customer> records, {
+    bool applyDates = true,
+  }) =>
+      records
+          .where(
+            (c) =>
+                (archived == null || archived == c.archived) &&
+                (governorate.isEmpty ||
+                    normalizeText(governorate) ==
+                        normalizeText(c.data.governorate)) &&
+                (city.isEmpty ||
+                    normalizeText(city) == normalizeText(c.data.city)) &&
+                (classification.isEmpty ||
+                    normalizeText(classification) ==
+                        normalizeText(c.data.classification)) &&
+                (type == null || type == c.data.type) &&
+                (!applyDates || dateMatches(c.createdAt)),
+          )
+          .toList()
+        ..sort((a, b) => a.id.compareTo(b.id));
   String describe(bool ar) => [
-    ar ? 'التواريخ: إنشاء العميل / حدوث النشاط؛ النهاية غير شاملة' : 'Dates: customer creation / activity occurrence; end exclusive',
+    ar
+        ? 'التواريخ: إنشاء العميل / حدوث النشاط؛ النهاية غير شاملة'
+        : 'Dates: customer creation / activity occurrence; end exclusive',
     '${from?.toUtc().toIso8601String() ?? "—"} / ${until?.toUtc().toIso8601String() ?? "—"}',
     '${ar ? "المحافظة / المدينة / التصنيف" : "Governorate / city / classification"}: $governorate / $city / $classification',
     '${ar ? "نوع العميل / النشاط / الأرشيف" : "Customer type / activity / archive"}: ${type?.name ?? "*"} / ${activityType?.name ?? "*"} / ${archived ?? "*"}',

@@ -103,10 +103,14 @@ class AppDestination {
       icon: Icons.bar_chart_outlined,
       page: ReportsPage(openModule: openCustomers),
     ),
-    if (openCustomers != null) AppDestination(
-      id: 'backup', arabic: 'النسخ الاحتياطي', english: 'Backup',
-      icon: Icons.backup_outlined, page: BackupPage(openModule: openCustomers),
-    ),
+    if (openCustomers != null)
+      AppDestination(
+        id: 'backup',
+        arabic: 'النسخ الاحتياطي',
+        english: 'Backup',
+        icon: Icons.backup_outlined,
+        page: BackupPage(openModule: openCustomers),
+      ),
     AppDestination(
       id: 'settings',
       arabic: 'الإعدادات',

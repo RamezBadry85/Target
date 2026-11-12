@@ -25,34 +25,54 @@ class _TargetAppState extends State<TargetApp> {
   Future<CustomerModule>? _module;
   Future<CustomerModule> _open() => _module ??= _initialize();
   Future<CustomerModule> _initialize() async {
-    try { return await (widget.openCustomers?.call() ?? _dependencies.open()); }
-    catch (_) { _module = null; rethrow; }
+    try {
+      return await (widget.openCustomers?.call() ?? _dependencies.open());
+    } catch (_) {
+      _module = null;
+      rethrow;
+    }
   }
+
   @override
   void initState() {
     super.initState();
     unawaited(_loadLocale());
   }
+
   Future<void> _loadLocale() async {
     try {
       final repo = (await _open()).repository;
       if (repo is LocalCustomerRepository) {
         final settings = await repo.readSettings();
-        if (mounted && !_localeChanged && ['ar', 'en'].contains(settings['locale'])) setState(() => _locale = Locale(settings['locale']! as String));
+        if (mounted &&
+            !_localeChanged &&
+            ['ar', 'en'].contains(settings['locale'])) {
+          setState(() => _locale = Locale(settings['locale']! as String));
+        }
       }
-    } catch (error, stack) { AppLogger.error('Could not load preferences',error,stack); }
+    } catch (error, stack) {
+      AppLogger.error('Could not load preferences', error, stack);
+    }
   }
+
   Future<void> _changeLocale(Locale locale) async {
     _localeChanged = true;
     setState(() => _locale = locale);
     try {
       final repo = (await _open()).repository;
-      if (repo is LocalCustomerRepository) await repo.saveLocale(locale.languageCode);
-    } catch (error,stack) { AppLogger.error('Could not save preferences',error,stack); }
+      if (repo is LocalCustomerRepository) {
+        await repo.saveLocale(locale.languageCode);
+      }
+    } catch (error, stack) {
+      AppLogger.error('Could not save preferences', error, stack);
+    }
   }
-  @override
-  void dispose() { unawaited(_dependencies.close()); super.dispose(); }
 
+  @override
+  void dispose() {
+    unawaited(_dependencies.close());
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
