@@ -1,3 +1,4 @@
+import '../core/backup/presentation/backup_page.dart';
 import 'package:flutter/material.dart';
 
 import '../core/l10n/app_strings.dart';
@@ -100,7 +101,11 @@ class AppDestination {
       arabic: 'التحليلات والتقارير',
       english: 'Analytics & reports',
       icon: Icons.bar_chart_outlined,
-      page: const ReportsPage(),
+      page: ReportsPage(openModule: openCustomers),
+    ),
+    if (openCustomers != null) AppDestination(
+      id: 'backup', arabic: 'النسخ الاحتياطي', english: 'Backup',
+      icon: Icons.backup_outlined, page: BackupPage(openModule: openCustomers),
     ),
     AppDestination(
       id: 'settings',

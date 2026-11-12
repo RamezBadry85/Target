@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'customer_dependencies.dart';
+import '../features/customers/data/local_customer_repository.dart';
+import '../core/logging/app_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -16,6 +20,34 @@ class TargetApp extends StatefulWidget {
 
 class _TargetAppState extends State<TargetApp> {
   Locale _locale = const Locale('ar');
+  bool _localeChanged = false;
+  final _dependencies = CustomerDependencies();
+  Future<CustomerModule> _open() => widget.openCustomers?.call() ?? _dependencies.open();
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadLocale());
+  }
+  Future<void> _loadLocale() async {
+    try {
+      final repo = (await _open()).repository;
+      if (repo is LocalCustomerRepository) {
+        final settings = await repo.readSettings();
+        if (mounted && !_localeChanged && ['ar', 'en'].contains(settings['locale'])) setState(() => _locale = Locale(settings['locale']! as String));
+      }
+    } catch (error, stack) { AppLogger.error('Could not load preferences',error,stack); }
+  }
+  Future<void> _changeLocale(Locale locale) async {
+    _localeChanged = true;
+    setState(() => _locale = locale);
+    try {
+      final repo = (await _open()).repository;
+      if (repo is LocalCustomerRepository) await repo.saveLocale(locale.languageCode);
+    } catch (error,stack) { AppLogger.error('Could not save preferences',error,stack); }
+  }
+  @override
+  void dispose() { unawaited(_dependencies.close()); super.dispose(); }
+
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -31,8 +63,8 @@ class _TargetAppState extends State<TargetApp> {
       GlobalCupertinoLocalizations.delegate,
     ],
     home: AppShell(
-      openCustomers: widget.openCustomers,
-      onLocaleChanged: (locale) => setState(() => _locale = locale),
+      openCustomers: _open,
+      onLocaleChanged: (locale) => unawaited(_changeLocale(locale)),
     ),
   );
 }

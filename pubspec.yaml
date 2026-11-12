@@ -24,6 +24,7 @@ dependencies:
   file_saver:
     path: third_party/file_saver
   file_selector: ^1.0.3
+  crypto: 3.0.8
   characters: 1.4.0
   archive: ^3.6.1
   xml: ^6.5.0

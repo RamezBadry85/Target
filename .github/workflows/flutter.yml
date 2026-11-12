@@ -96,7 +96,22 @@ jobs:
 
       - name: Run unit and widget tests
         if: ${{ !cancelled() }}
+        env:
+          TARGET_REPORT_SAMPLES: ${{ runner.temp }}/report-samples
         run: bash tool/ci_check.sh flutter test --no-pub --reporter expanded --timeout 2m
+
+      - name: Independently inspect generated report files
+        run: |
+          python3 -m pip install openpyxl==3.1.5 PyMuPDF==1.26.7
+          python3 tool/inspect_report_samples.py "$RUNNER_TEMP/report-samples"
+
+      - name: Upload actual sample reports and renderings
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: report-samples
+          path: ${{ runner.temp }}/report-samples/
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Verify browser IndexedDB persistence
         run: bash tool/ci_check.sh flutter test --no-pub --platform chrome test/browser/customer_indexeddb_test.dart

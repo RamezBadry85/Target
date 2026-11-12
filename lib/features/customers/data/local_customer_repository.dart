@@ -1,3 +1,5 @@
+import '../../../core/backup/backup_document.dart';
+import 'package:sembast/sembast_memory.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:sembast/sembast.dart';
@@ -492,6 +494,62 @@ class LocalCustomerRepository implements CustomerRepository, CustomerSyncStore {
       throw const CustomerException(CustomerProblem.invalidBackup);
     }
   });
+  final settingsStore = stringMapStoreFactory.store('application_settings');
+  Future<Map<String, Object?>> readSettings() async =>
+      await settingsStore.record('preferences').get(db) ?? <String, Object?>{};
+  Future<void> saveLocale(String locale) async {
+    if (!['ar', 'en'].contains(locale)) throw ArgumentError.value(locale);
+    await settingsStore.record('preferences').put(db, {'locale': locale});
+  }
+  Future<Map<String, Object?>> _snapshot(DatabaseClient txn) async {
+    final payload = <String, Object?>{
+      'format': 'target-customers', 'version': 2,
+      'generatedAt': clock().toUtc().toIso8601String(),
+    };
+    for (final store in [customerStore, activityStore, outboxStore, conflictStore]) {
+      payload[store.name] = (await store.find(txn)).map((r) => {'key': r.key, 'value': r.value}).toList();
+    }
+    return {'payload': payload, 'settings': await settingsStore.record('preferences').get(txn) ?? <String, Object?>{}};
+  }
+  Future<Map<String, Object?>> completeSnapshot() => db.transaction(_snapshot);
+
+  /// Validate business invariants in an isolated in-memory v2 repository first.
+  /// The old recovery path remains available for legacy backups. Complete
+  /// recovery preserves original records, operation IDs and sync metadata.
+  Future<void> restoreComplete(
+    BackupDocument document, {
+    String? expectedCurrentFingerprint,
+    Future<void> Function()? afterClearForTest,
+  }) async {
+    final checked = BackupDocument.decode(document.encode());
+    final staging = LocalCustomerRepository(await openCustomerDatabase(newDatabaseFactoryMemory(), const Uuid().v4()));
+    try {
+      await staging.restore(Uint8List.fromList(utf8.encode(jsonEncode(checked.payload))));
+    } finally {
+      await staging.close();
+    }
+    await db.transaction((txn) async {
+      final current = await _snapshot(txn);
+      final stores = [customerStore, activityStore, outboxStore, conflictStore];
+      final hasData = (current['payload']! as Map<Object?, Object?>).entries.any((entry) =>
+          BackupDocument.stores.contains(entry.key) && (entry.value as List<Object?>).isNotEmpty);
+      if (expectedCurrentFingerprint == null) {
+        if (hasData) throw const FormatException('Restore requires an empty database');
+      } else if (BackupDocument.fingerprint(current) != expectedCurrentFingerprint) {
+        throw const FormatException('Database changed after safety backup; retry');
+      }
+      for (final store in stores) { await store.delete(txn); }
+      await settingsStore.delete(txn);
+      if (afterClearForTest != null) await afterClearForTest();
+      for (final store in stores) {
+        for (final raw in checked.payload[store.name]! as List<Object?>) {
+          final row = raw as Map<Object?, Object?>;
+          await store.record(row['key'] as String).put(txn, Map<String, Object?>.from(row['value'] as Map<Object?, Object?>));
+        }
+      }
+      await settingsStore.record('preferences').put(txn, checked.settings);
+    });
+  }
   @override
   Future<void> close() => db.close();
 }
