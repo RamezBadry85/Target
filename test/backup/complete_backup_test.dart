@@ -67,6 +67,28 @@ void main() {
     },
   );
   test(
+    'legacy schema-v2 backups remain importable without losing current language',
+    () async {
+      await destination.saveLocale('ar');
+      final legacyBytes = await source.backup();
+      final prepared = BackupService.inspect(legacyBytes);
+      expect(prepared.isLegacy, isTrue);
+      expect(prepared.document.counts['customers'], 1);
+      await BackupService(destination).restore(legacyBytes);
+      final sourceSnapshot = await source.completeSnapshot();
+      final expected = {
+        'payload': sourceSnapshot['payload'],
+        'settings': {'locale': 'ar'},
+      };
+      expect(
+        BackupDocument.fingerprint(await destination.completeSnapshot()),
+        BackupDocument.fingerprint(expected),
+      );
+      expect((await destination.readSettings())['locale'], 'ar');
+    },
+  );
+
+  test(
     'corruption and unsupported schema are rejected without changing destination',
     () async {
       await destination.save(draft(name: 'Existing', phone: '01099999999'));

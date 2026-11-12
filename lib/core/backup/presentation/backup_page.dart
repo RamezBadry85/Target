@@ -48,7 +48,8 @@ class _BackupPageState extends State<BackupPage> {
       } else {
         final bytes = await DocumentFiles.pickBackup();
         if (bytes == null) return;
-        final document = BackupDocument.decode(bytes);
+        final prepared = BackupService.inspect(bytes);
+        final document = prepared.document;
         if (!mounted) return;
         final choice = await showDialog<String>(
           context: context,
@@ -57,7 +58,7 @@ class _BackupPageState extends State<BackupPage> {
             title: Text(t('مراجعة الاستعادة', 'Review restore')),
             content: SingleChildScrollView(
               child: Text(
-                '${document.createdAt.toIso8601String()}\n${document.counts}\n${bytes.length} bytes\n${t("تم التحقق من البصمة والإصدار. الاستبدال يغيّر البيانات الحالية ويتطلب حفظ نسخة أمان أولاً. لا يوجد دمج. سيتم تطبيق إعداد اللغة عند إعادة التشغيل.", "Checksum and version verified. Replacement changes existing data and requires saving a safety backup first. No merge. Language setting applies on restart.")}',
+                '${document.createdAt.toIso8601String()}\n${document.counts}\n${bytes.length} bytes\n${prepared.isLegacy ? t("ملف قديم بلا بصمة؛ ستُفحص السجلات قبل التغيير.", "Legacy file has no checksum; records will be validated before changes.") : t("تم التحقق من بصمة SHA-256 والإصدار.", "SHA-256 checksum and version verified.")}\n${t("الاستبدال يغيّر البيانات الحالية ويتطلب حفظ نسخة أمان أولاً. لا يوجد دمج. سيتم تطبيق إعداد اللغة عند إعادة التشغيل.", "Replacement changes current data and requires a safety backup first. No merge. Language setting applies on restart.")}',
               ),
             ),
             actions: [
