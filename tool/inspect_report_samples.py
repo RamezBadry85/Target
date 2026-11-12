@@ -15,7 +15,38 @@ import openpyxl
 root = Path(sys.argv[1])
 manifest = []
 for path in sorted(root.glob('*')):
-    if path.suffix == '.xlsx':
+    if path.name == 'complete_backup.json':
+        envelope = json.loads(path.read_text(encoding='utf-8'))
+        body = envelope['body']
+        checksum = envelope['checksum']
+        canonical = json.dumps(
+            body,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(',', ':'),
+            allow_nan=False,
+        ).encode('utf-8')
+        assert checksum == {
+            'algorithm': 'SHA-256',
+            'value': hashlib.sha256(canonical).hexdigest(),
+        }, path
+        assert body['format'] == 'target-complete-backup', path
+        assert body['schemaVersion'] == 2, path
+        payload = body['payload']
+        assert body['counts']['customers'] == len(payload['customers']), path
+        assert body['counts']['customer_activities'] == len(
+            payload['customer_activities']
+        ), path
+        assert body['counts']['contacts'] == sum(
+            len(row['value']['data']['contacts']) for row in payload['customers']
+        ), path
+        manifest.append({
+            'file': path.name,
+            'bytes': path.stat().st_size,
+            'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+            'counts': body['counts'],
+        })
+    elif path.suffix == '.xlsx':
         book = openpyxl.load_workbook(path)
         sheet = book['Records']
         assert sheet.freeze_panes == 'A2', path
