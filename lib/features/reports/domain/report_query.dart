@@ -65,12 +65,41 @@ class ReportQuery {
           )
           .toList()
         ..sort((a, b) => a.id.compareTo(b.id));
-  String describe(bool ar) => [
-    ar
-        ? 'التواريخ: إنشاء العميل / حدوث النشاط؛ النهاية غير شاملة'
-        : 'Dates: customer creation / activity occurrence; end exclusive',
-    '${from?.toUtc().toIso8601String() ?? "—"} / ${until?.toUtc().toIso8601String() ?? "—"}',
-    '${ar ? "المحافظة / المدينة / التصنيف" : "Governorate / city / classification"}: $governorate / $city / $classification',
-    '${ar ? "نوع العميل / النشاط / الأرشيف" : "Customer type / activity / archive"}: ${type?.name ?? "*"} / ${activityType?.name ?? "*"} / ${archived ?? "*"}',
-  ].join(' · ');
+  String describe(bool ar) {
+    const customerTypesAr = [
+      'مستشفى', 'عيادة', 'مركز طبي', 'جامعة', 'جهة صحية حكومية',
+      'جهة صحية خاصة', 'موزع', 'منظمة أخرى',
+    ];
+    const customerTypesEn = [
+      'Hospital', 'Clinic', 'Medical center', 'University',
+      'Government healthcare', 'Private healthcare', 'Distributor', 'Other organization',
+    ];
+    const activitiesAr = [
+      'زيارة', 'مكالمة', 'اجتماع', 'متابعة', 'عرض سعر (سجل وصفي)',
+      'بيع (سجل وصفي)', 'تحصيل (سجل وصفي)', 'ملاحظة',
+    ];
+    const activitiesEn = [
+      'Visit', 'Call', 'Meeting', 'Follow-up', 'Quotation (log only)',
+      'Sale (log only)', 'Collection (log only)', 'Note',
+    ];
+    final typeLabel = type == null
+        ? '*'
+        : (ar ? customerTypesAr : customerTypesEn)[type!.index];
+    final activityLabel = activityType == null
+        ? '*'
+        : (ar ? activitiesAr : activitiesEn)[activityType!.index];
+    final archiveLabel = archived == null
+        ? '*'
+        : archived!
+        ? (ar ? 'مؤرشف' : 'Archived')
+        : (ar ? 'غير مؤرشف' : 'Not archived');
+    return [
+      ar
+          ? 'التواريخ: إنشاء العميل / حدوث النشاط؛ النهاية غير شاملة'
+          : 'Dates: customer creation / activity occurrence; end exclusive',
+      '${from?.toUtc().toIso8601String() ?? "—"} / ${until?.toUtc().toIso8601String() ?? "—"}',
+      '${ar ? "المحافظة / المدينة / التصنيف" : "Governorate / city / classification"}: $governorate / $city / $classification',
+      '${ar ? "نوع العميل / النشاط / الأرشيف" : "Customer type / activity / archive"}: $typeLabel / $activityLabel / $archiveLabel',
+    ].join(' · ');
+  }
 }

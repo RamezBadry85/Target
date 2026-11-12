@@ -4,6 +4,7 @@ Requires openpyxl and PyMuPDF in CI. Fixtures are deliberately non-operational.
 import base64
 import hashlib
 import json
+import unicodedata
 from pathlib import Path
 import sys
 import io
@@ -21,16 +22,35 @@ for path in sorted(root.glob('*')):
         assert sheet.auto_filter.ref, path
         assert bool(sheet.sheet_view.rightToLeft) == ('_ar' in path.stem), path
         assert book['Report']['B3'].value == sheet.max_row - 1, path
+        if path.name == 'directory_ar.xlsx':
+            assert sheet['B2'].value == 'مؤسسة الاختبار', path
+            assert sheet['T2'].is_date, path
+            assert sheet['T2'].number_format == 'yyyy-mm-dd hh:mm', path
+            assert isinstance(sheet['P2'].value, float), path
+            assert sheet['P2'].number_format == '#,##0.00', path
+        for column in sheet.column_dimensions.values():
+            if column.width is not None:
+                assert 12 <= column.width <= 50, path
         for row in sheet:
             assert all(cell.data_type != 'f' for cell in row), path
         book.close()
     elif path.suffix == '.pdf':
         document = fitz.open(path)
         assert len(document) > 0
+        extracted_text = '\n'.join(page.get_text() for page in document)
+        normalized_text = ' '.join(
+            unicodedata.normalize('NFKC', extracted_text).split()
+        )
+        assert normalized_text.strip(), path
+        if path.name == 'directory_ar.pdf':
+            assert 'دليل العملاء' in normalized_text, path
+            assert 'مؤسسة الاختبار' in normalized_text, path
+        if path.name == 'activities_en.pdf':
+            assert 'Customer activities' in extracted_text, path
+            assert 'Visit' in extracted_text, path
         for page in document:
             assert abs(page.rect.width - 595.28) < 1, path
             assert abs(page.rect.height - 841.89) < 1, path
-            assert page.get_text().strip(), path
             pixels = page.get_pixmap(matrix=fitz.Matrix(1, 1))
             assert len(set(pixels.samples)) > 1, path
         if path.name in ['directory_ar.pdf', 'activities_en.pdf']:
@@ -43,8 +63,9 @@ for path in sorted(root.glob('*')):
     manifest.append({'file': path.name, 'bytes': path.stat().st_size,
                      'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                      **({'pages': pages} if path.suffix == '.pdf' else {})})
-assert len([r for r in manifest if r['file'].endswith('.xlsx')]) == 12
-assert len([r for r in manifest if r['file'].endswith('.pdf')]) == 13
+expected_xlsx, expected_pdf = (2, 2) if '--subset' in sys.argv else (12, 13)
+assert len([r for r in manifest if r['file'].endswith('.xlsx')]) == expected_xlsx
+assert len([r for r in manifest if r['file'].endswith('.pdf')]) == expected_pdf
 (root / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
 print(f'::notice title=Independent output inspection::{len(manifest)} actual files independently parsed; all PDF pages rasterized')
 

@@ -33,7 +33,13 @@ class ReportExporter {
       );
     }
     for (var col = 0; col < report.headers.length; col++) {
-      sheet.setColumnWidth(col, 30);
+      final contentWidth = report.rows.fold<int>(
+        report.headers[col].length,
+        (width, row) => width > display(row[col]).length
+            ? width
+            : display(row[col]).length,
+      );
+      sheet.setColumnWidth(col, contentWidth.clamp(12, 50).toDouble());
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: 0))
           .cellStyle = CellStyle(

@@ -130,6 +130,15 @@ void main() {
       );
       expect(grouped.rows.single.last, 1);
       expect(grouped.recordCount, 1);
+      expect(
+        const ReportQuery(type: CustomerType.clinic).describe(true),
+        contains('عيادة'),
+      );
+      expect(
+        const ReportQuery(activityType: ActivityType.phoneCall, archived: false)
+            .describe(false),
+        contains('Call / Not archived'),
+      );
     },
   );
   for (final arabic in [true, false]) {
